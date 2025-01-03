@@ -1,3 +1,6 @@
+# Project-specific files
+ignored
+
 # Python-generated files
 __pycache__/
 *.py[oc]
