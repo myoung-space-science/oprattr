@@ -188,7 +188,7 @@ class Object(typing.Generic[DataType]):
                 return type(self)(self._data + other)
             return NotImplemented
         if self._meta == other._meta:
-            return type(self)(self._data + other._data)
+            return type(self)(self._data + other._data, **self._meta)
         raise TypeError(
             "Cannot compute a + b for objects with different metadata"
         ) from None
@@ -206,7 +206,7 @@ class Object(typing.Generic[DataType]):
                 return type(self)(self._data - other)
             return NotImplemented
         if self._meta == other._meta:
-            return type(self)(self._data - other._data)
+            return type(self)(self._data - other._data, **self._meta)
         raise TypeError(
             "Cannot compute a - b for objects with different metadata"
         ) from None
