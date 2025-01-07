@@ -125,11 +125,9 @@ class Object(typing.Generic[DataType]):
             if not self._meta:
                 return self._data == other
             return False
-        keys = set(self._meta) & set(other._meta)
-        attrs_eq = [self._meta[k] == other._meta[k] for k in keys]
-        if all(attrs_eq):
-            return self._data == other._data
-        return False
+        if self._meta != other._meta:
+            return False
+        return self._data == other._data
 
     def __ne__(self, other):
         """Called for self != other."""
