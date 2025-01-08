@@ -237,16 +237,22 @@ def ordering(f: operators.Operator, a, b):
         if a._meta == b._meta:
             return f(a._data, b._data)
         raise TypeError(
-            f"Cannot compute {f} between objects with different metadata"
+            f"Cannot compute {f} between objects with unequal metadata"
         ) from None
     if isinstance(a, Object):
         if not a._meta:
             return f(a._data, b)
-        return NotImplemented
+        raise TypeError(
+            f"Cannot compute {f} between Object and {type(b)}"
+            " when Object has metadata"
+        ) from None
     if isinstance(b, Object):
         if not b._meta:
             return f(a, b._data)
-        return NotImplemented
+        raise TypeError(
+            f"Cannot compute {f} between {type(a)} and Object"
+            " when Object has metadata"
+        ) from None
     return f(a, b)
 
 
@@ -259,7 +265,7 @@ def unary(f: operators.Operator, a):
                 v = f(value)
             except TypeError as exc:
                 raise TypeError(
-                    f"Cannot compute {f} of object with attribute {key!r}"
+                    f"Cannot compute {f} of Object with attribute {key!r}"
                     ", which does not support this operation"
                 ) from exc
             else:
@@ -279,11 +285,17 @@ def additive(f: operators.Operator, a, b):
     if isinstance(a, Object):
         if not a._meta:
             return type(a)(f(a._data, b))
-        return NotImplemented
+        raise TypeError(
+            f"Cannot compute {f} between Object and {type(b)}"
+            " when Object has metadata"
+        ) from None
     if isinstance(b, Object):
         if not b._meta:
             return type(b)(f(a, b._data))
-        return NotImplemented
+        raise TypeError(
+            f"Cannot compute {f} between {type(a)} and Object"
+            " when Object has metadata"
+        ) from None
     return f(a, b)
 
 
@@ -291,10 +303,17 @@ def multiplicative(f:  operators.Operator, a, b):
     """Compute the multiplicative operation f(a, b)."""
     if isinstance(a, Object) and isinstance(b, Object):
         keys = set(a._meta) & set(b._meta)
-        try:
-            meta = {key: f(a._meta[key], b._meta[key]) for key in keys}
-        except TypeError:
-            return NotImplemented
+        meta = {}
+        for key in keys:
+            try:
+                v = f(a._meta[key], b._meta[key])
+            except TypeError as exc:
+                raise TypeError(
+                    f"Cannot compute {f} between objects with attribute {key!r}"
+                    ", which does note support this operation"
+                ) from exc
+            else:
+                meta[key] = v
         for key, value in a._meta.items():
             if key not in keys:
                 meta[key] = value
@@ -303,16 +322,32 @@ def multiplicative(f:  operators.Operator, a, b):
                 meta[key] = value
         return type(a)(f(a._data, b._data), **meta)
     if isinstance(a, Object):
-        try:
-            meta = {key: f(value, b) for key, value in a._meta.items()}
-        except TypeError:
-            return NotImplemented
+        meta = {}
+        for key, value in a._meta.items():
+            try:
+                v = f(value, b)
+            except TypeError as exc:
+                raise TypeError(
+                    f"Cannot compute {f} between Object and {type(b)}"
+                    f" because attribute {key!r} does not support this"
+                    " operation"
+                ) from exc
+            else:
+                meta[key] = v
         return type(a)(f(a._data, b), **meta)
     if isinstance(b, Object):
-        try:
-            meta = {key: f(a, value) for key, value in b._meta.items()}
-        except TypeError:
-            return NotImplemented
+        meta = {}
+        for key, value in b._meta.items():
+            try:
+                v = f(a, value)
+            except TypeError as exc:
+                raise TypeError(
+                    f"Cannot compute {f} between {type(a)} and Object"
+                    f" because attribute {key!r} does not support this"
+                    " operation"
+                ) from exc
+            else:
+                meta[key] = v
         return type(b)(f(a, b._data), **meta)
     return f(a, b)
 
