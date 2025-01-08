@@ -84,6 +84,34 @@ def test_ordering():
          x(1, name='A') >= +1
 
 
+class Spin:
+    def __init__(self, __v: int):
+        self._v = __v
+    def __repr__(self):
+        return f"Spin({self._v!r})"
+    def __eq__(self, other):
+        if isinstance(other, Spin):
+            return self._v == other._v
+        if isinstance(other, (int, float)):
+            return self._v == other
+        return False
+    def __abs__(self):
+        return abs(self._v)
+    def __neg__(self):
+        return -self._v
+
+
+def test_unary():
+    """Test the all unary operations."""
+    assert abs(x(-1)) == x(1)
+    assert +x(-1) == x(-1)
+    assert -x(1) == x(-1)
+    assert abs(x(-1, spin=Spin(-2))) == x(1, spin=Spin(2))
+    with pytest.raises(TypeError):
+        +x(-1, spin=Spin(1))
+    assert -x(1, spin=Spin(2)) == x(-1, spin=Spin(-2))
+
+
 def test_additive():
     """Test the + and - operations."""
     assert x(1) + x(2) == x(3)
