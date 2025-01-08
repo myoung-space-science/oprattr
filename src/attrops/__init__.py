@@ -4,6 +4,8 @@ import typing
 
 import numpy.typing
 
+from . import operators
+
 
 @typing.runtime_checkable
 class Real(typing.Protocol):
@@ -121,245 +123,166 @@ class Object(typing.Generic[DataType]):
 
     def __eq__(self, other):
         """Called for self == other."""
-        if not isinstance(other, Object):
-            if not self._meta:
-                return self._data == other
-            return False
-        if self._meta != other._meta:
-            return False
-        return self._data == other._data
+        return equality(operators.eq, self, other)
 
     def __ne__(self, other):
         """Called for self != other."""
-        return not (self == other)
+        return equality(operators.ne, self, other)
 
     def __lt__(self, other):
         """Called for self < other."""
-        if not isinstance(other, Object):
-            if not self._meta:
-                return self._data < other
-            return NotImplemented
-        if self._meta == other._meta:
-            return self._data < other._data
-        raise TypeError(
-            "Cannot compute a < b for objects with different metadata"
-        ) from None
+        return ordering(operators.lt, self, other)
 
     def __le__(self, other):
         """Called for self <= other."""
-        if not isinstance(other, Object):
-            if not self._meta:
-                return self._data <= other
-            return NotImplemented
-        if self._meta == other._meta:
-            return self._data <= other._data
-        raise TypeError(
-            "Cannot compute a <= b for objects with different metadata"
-        ) from None
+        return ordering(operators.le, self, other)
 
     def __gt__(self, other):
         """Called for self > other."""
-        if not isinstance(other, Object):
-            if not self._meta:
-                return self._data > other
-            return NotImplemented
-        if self._meta == other._meta:
-            return self._data > other._data
-        raise TypeError(
-            "Cannot compute a > b for objects with different metadata"
-        ) from None
+        return ordering(operators.gt, self, other)
 
     def __ge__(self, other):
         """Called for self >= other."""
-        if not isinstance(other, Object):
-            if not self._meta:
-                return self._data >= other
-            return NotImplemented
-        if self._meta == other._meta:
-            return self._data >= other._data
-        raise TypeError(
-            "Cannot compute a >= b for objects with different metadata"
-        ) from None
+        return ordering(operators.ge, self, other)
 
     def __add__(self, other):
         """Called for self + other."""
-        if not isinstance(other, Object):
-            if not self._meta:
-                return type(self)(self._data + other)
-            return NotImplemented
-        if self._meta == other._meta:
-            return type(self)(self._data + other._data, **self._meta)
-        raise TypeError(
-            "Cannot compute a + b for objects with different metadata"
-        ) from None
+        return additive(operators.add, self, other)
 
     def __radd__(self, other):
         """Called for other + self."""
-        if not self._meta:
-            return type(self)(other + self._data)
-        return NotImplemented
+        return additive(operators.add, other, self)
 
     def __sub__(self, other):
         """Called for self - other."""
-        if not isinstance(other, Object):
-            if not self._meta:
-                return type(self)(self._data - other)
-            return NotImplemented
-        if self._meta == other._meta:
-            return type(self)(self._data - other._data, **self._meta)
-        raise TypeError(
-            "Cannot compute a - b for objects with different metadata"
-        ) from None
+        return additive(operators.sub, self, other)
 
     def __rsub__(self, other):
         """Called for other - self."""
-        if not self._meta:
-            return type(self)(other - self._data)
-        return NotImplemented
+        return additive(operators.sub, other, self)
 
     def __mul__(self, other):
         """Called for self * other."""
-        if not isinstance(other, Object):
-            try:
-                meta = {k: v * other for k, v in self._meta.items()}
-            except TypeError:
-                return NotImplemented
-            return type(self)(self._data * other, **meta)
-        keys = set(self._meta) & set(other._meta)
-        try:
-            meta = {key: self._meta[key] * other._meta[key] for key in keys}
-        except TypeError:
-            return NotImplemented
-        for key, value in self._meta.items():
-            if key not in keys:
-                meta[key] = value
-        for key, value in other._meta.items():
-            if key not in keys:
-                meta[key] = value
-        return type(self)(self._data * other._data, **meta)
+        return multiplicative(operators.mul, self, other)
 
     def __rmul__(self, other):
         """Called for other * self."""
-        try:
-            meta = {k: other * v for k, v in self._meta.items()}
-        except TypeError:
-            return NotImplemented
-        return type(self)(other * self._data, **meta)
+        return multiplicative(operators.mul, other, self)
 
     def __truediv__(self, other):
         """Called for self / other."""
-        if not isinstance(other, Object):
-            try:
-                meta = {k: v / other for k, v in self._meta.items()}
-            except TypeError:
-                return NotImplemented
-            return type(self)(self._data / other, **meta)
-        keys = set(self._meta) & set(other._meta)
-        try:
-            meta = {key: self._meta[key] / other._meta[key] for key in keys}
-        except TypeError:
-            return NotImplemented
-        for key, value in self._meta.items():
-            if key not in keys:
-                meta[key] = value
-        for key, value in other._meta.items():
-            if key not in keys:
-                meta[key] = value
-        return type(self)(self._data / other._data, **meta)
+        return multiplicative(operators.truediv, self, other)
 
     def __rtruediv__(self, other):
         """Called for other / self."""
-        try:
-            meta = {k: other / v for k, v in self._meta.items()}
-        except TypeError:
-            return NotImplemented
-        return type(self)(other / self._data, **meta)
+        return multiplicative(operators.truediv, other, self)
 
     def __floordiv__(self, other):
         """Called for self // other."""
-        if not isinstance(other, Object):
-            try:
-                meta = {k: v // other for k, v in self._meta.items()}
-            except TypeError:
-                return NotImplemented
-            return type(self)(self._data // other, **meta)
-        keys = set(self._meta) & set(other._meta)
-        try:
-            meta = {key: self._meta[key] // other._meta[key] for key in keys}
-        except TypeError:
-            return NotImplemented
-        for key, value in self._meta.items():
-            if key not in keys:
-                meta[key] = value
-        for key, value in other._meta.items():
-            if key not in keys:
-                meta[key] = value
-        return type(self)(self._data // other._data, **meta)
+        return multiplicative(operators.floordiv, self, other)
 
     def __rfloordiv__(self, other):
         """Called for other // self."""
-        try:
-            meta = {k: other // v for k, v in self._meta.items()}
-        except TypeError:
-            return NotImplemented
-        return type(self)(other // self._data, **meta)
+        return multiplicative(operators.floordiv, other, self)
 
     def __mod__(self, other):
         """Called for self % other."""
-        if not isinstance(other, Object):
-            try:
-                meta = {k: v % other for k, v in self._meta.items()}
-            except TypeError:
-                return NotImplemented
-            return type(self)(self._data % other, **meta)
-        keys = set(self._meta) & set(other._meta)
-        try:
-            meta = {key: self._meta[key] % other._meta[key] for key in keys}
-        except TypeError:
-            return NotImplemented
-        for key, value in self._meta.items():
-            if key not in keys:
-                meta[key] = value
-        for key, value in other._meta.items():
-            if key not in keys:
-                meta[key] = value
-        return type(self)(self._data % other._data, **meta)
+        return multiplicative(operators.mod, self, other)
 
     def __rmod__(self, other):
         """Called for other % self."""
-        try:
-            meta = {k: other % v for k, v in self._meta.items()}
-        except TypeError:
-            return NotImplemented
-        return type(self)(other % self._data, **meta)
+        return multiplicative(operators.mod, other, self)
 
     def __pow__(self, other):
         """Called for self ** other."""
-        if not isinstance(other, Object):
-            try:
-                meta = {k: v ** other for k, v in self._meta.items()}
-            except TypeError:
-                return NotImplemented
-            return type(self)(self._data ** other, **meta)
-        keys = set(self._meta) & set(other._meta)
-        try:
-            meta = {key: self._meta[key] ** other._meta[key] for key in keys}
-        except TypeError:
-            return NotImplemented
-        for key, value in self._meta.items():
-            if key not in keys:
-                meta[key] = value
-        for key, value in other._meta.items():
-            if key not in keys:
-                meta[key] = value
-        return type(self)(self._data ** other._data, **meta)
+        return multiplicative(operators.pow, self, other)
 
     def __rpow__(self, other):
         """Called for other ** self."""
+        return multiplicative(operators.pow, other, self)
+
+
+def equality(f: operators.Operator, a, b):
+    """Compute the equality operation f(a, b)."""
+    if isinstance(a, Object) and isinstance(b, Object):
+        if a._meta != b._meta:
+            return f is operators.ne
+        return f(a._data, b._data)
+    if isinstance(a, Object):
+        if not a._meta:
+            return f(a._data, b)
+        return f is operators.ne
+    if isinstance(b, Object):
+        if not b._meta:
+            return f(a, b._data)
+        return f is operators.ne
+    return f(a, b)
+
+
+def ordering(f: operators.Operator, a, b):
+    """Compute the ordering operation f(a, b)."""
+    if isinstance(a, Object) and isinstance(b, Object):
+        if a._meta == b._meta:
+            return f(a._data, b._data)
+        raise TypeError(
+            f"Cannot compute {f} between objects with different metadata"
+        ) from None
+    if isinstance(a, Object):
+        if not a._meta:
+            return f(a._data, b)
+        return NotImplemented
+    if isinstance(b, Object):
+        if not b._meta:
+            return f(a, b._data)
+        return NotImplemented
+    return f(a, b)
+
+
+def additive(f: operators.Operator, a, b):
+    """Compute the additive operation f(a, b)."""
+    if isinstance(a, Object) and isinstance(b, Object):
+        if a._meta == b._meta:
+            return type(a)(f(a._data, b._data), **a._meta)
+        raise TypeError(
+            f"Cannot compute {f} between objects with unequal metadata"
+        ) from None
+    if isinstance(a, Object):
+        if not a._meta:
+            return type(a)(f(a._data, b))
+        return NotImplemented
+    if isinstance(b, Object):
+        if not b._meta:
+            return type(b)(f(a, b._data))
+        return NotImplemented
+    return f(a, b)
+
+
+def multiplicative(f:  operators.Operator, a, b):
+    """Compute the multiplicative operation f(a, b)."""
+    if isinstance(a, Object) and isinstance(b, Object):
+        keys = set(a._meta) & set(b._meta)
         try:
-            meta = {k: other ** v for k, v in self._meta.items()}
+            meta = {key: f(a._meta[key], b._meta[key]) for key in keys}
         except TypeError:
             return NotImplemented
-        return type(self)(other ** self._data, **meta)
-
+        for key, value in a._meta.items():
+            if key not in keys:
+                meta[key] = value
+        for key, value in b._meta.items():
+            if key not in keys:
+                meta[key] = value
+        return type(a)(f(a._data, b._data), **meta)
+    if isinstance(a, Object):
+        try:
+            meta = {key: f(value, b) for key, value in a._meta.items()}
+        except TypeError:
+            return NotImplemented
+        return type(a)(f(a._data, b), **meta)
+    if isinstance(b, Object):
+        try:
+            meta = {key: f(a, value) for key, value in b._meta.items()}
+        except TypeError:
+            return NotImplemented
+        return type(b)(f(a, b._data), **meta)
+    return f(a, b)
 
