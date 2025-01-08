@@ -145,6 +145,18 @@ class Object(typing.Generic[DataType]):
         """Called for self >= other."""
         return ordering(operators.ge, self, other)
 
+    def __abs__(self):
+        """Called for abs(self)."""
+        return unary(operators.abs, self)
+
+    def __pos__(self):
+        """Called for +self."""
+        return unary(operators.pos, self)
+
+    def __neg__(self):
+        """Called for -self."""
+        return unary(operators.neg, self)
+
     def __add__(self, other):
         """Called for self + other."""
         return additive(operators.add, self, other)
@@ -236,6 +248,24 @@ def ordering(f: operators.Operator, a, b):
             return f(a, b._data)
         return NotImplemented
     return f(a, b)
+
+
+def unary(f: operators.Operator, a):
+    """Compute the unary operation f(a)."""
+    if isinstance(a, Object):
+        meta = {}
+        for key, value in a._meta.items():
+            try:
+                v = f(value)
+            except TypeError as exc:
+                raise TypeError(
+                    f"Cannot compute {f} of object with attribute {key!r}"
+                    ", which does not support this operation"
+                ) from exc
+            else:
+                meta[key] = v
+        return type(a)(f(a._data), **meta)
+    return f(a)
 
 
 def additive(f: operators.Operator, a, b):
