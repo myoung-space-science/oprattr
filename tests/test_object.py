@@ -5,25 +5,25 @@ import attrops
 
 
 def test_initialize():
-    """Test rules for initializing an object."""
-    assert isinstance(attrops.Object(+1), attrops.Object)
-    assert isinstance(attrops.Object(+1.0), attrops.Object)
-    assert isinstance(attrops.Object(-1), attrops.Object)
-    assert isinstance(attrops.Object(-1.0), attrops.Object)
-    assert isinstance(attrops.Object(numpy.array([1, 2])), attrops.Object)
+    """Test rules for initializing defined types."""
+    assert isinstance(attrops.Operand(+1), attrops.Operand)
+    assert isinstance(attrops.Operand(+1.0), attrops.Operand)
+    assert isinstance(attrops.Operand(-1), attrops.Operand)
+    assert isinstance(attrops.Operand(-1.0), attrops.Operand)
+    assert isinstance(attrops.Operand(numpy.array([1, 2])), attrops.Operand)
     with pytest.raises(TypeError):
-        attrops.Object([1, 2])
+        attrops.Operand([1, 2])
     with pytest.raises(TypeError):
-        attrops.Object((1, 2))
+        attrops.Operand((1, 2))
     with pytest.raises(TypeError):
-        attrops.Object({1, 2})
+        attrops.Operand({1, 2})
     with pytest.raises(TypeError):
-        attrops.Object("+1")
+        attrops.Operand("+1")
 
 
 def x(data, **metadata):
     """Convenience factory function."""
-    return attrops.Object(data, **metadata)
+    return attrops.Operand(data, **metadata)
 
 
 def test_equality():

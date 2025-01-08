@@ -1,0 +1,183 @@
+import typing
+
+from . import operators
+from ._types import Object
+
+
+class MetadataError(TypeError):
+    """A metadata-related TypeError occurred."""
+
+    def __init__(
+        self,
+        f: operators.Operator,
+        *args,
+        error: typing.Optional[str]=None,
+        key: typing.Optional[str]=None,
+    ) -> None:
+        super().__init__(*args)
+        self._f = f
+        self._error = error
+        self._key = key
+
+    def __repr__(self):
+        """Called when handling the exception."""
+        types = [type(arg) for arg in self.args]
+        try:
+            errmsg = _build_error_message(
+                self._f,
+                *types,
+                error=self._error,
+                key=self._key,
+            )
+        except Exception:
+            return super().__repr__(self._f, *types)
+        return errmsg
+
+
+def _build_error_message(
+    f: operators.Operator,
+    *types: type,
+    error: typing.Optional[str]=None,
+    key: typing.Optional[str]=None,
+) -> str:
+    """Helper for `_raise_metadata_exception`.
+    
+    This function should avoid raising an exception if at all possible, and
+    instead return the default error message, since it is already being called
+    as the result of an error elsewhere.
+    """
+    errmsg = f"Cannot compute {f}"
+    errstr = error.lower() if isinstance(error, str) else ''
+    if errstr == 'unequal':
+        return f"{errmsg} between objects with unequal metadata"
+    if errstr in {'non-empty', 'nonempty'}:
+        if len(types) == 2:
+            a, b = types
+            endstr = "because {} has metadata"
+            if issubclass(a, Object):
+                return f"{errmsg} between {a} and {b} {endstr.format(str(a))}"
+            if issubclass(b, Object):
+                return f"{errmsg} between {a} and {b} {endstr.format(str(b))}"
+    if errstr == 'type':
+        if key is None:
+            keystr = "a metadata attribute"
+        else:
+            keystr = f"metadata attribute {key!r}"
+        midstr = f"because {keystr}"
+        endstr = "does not support this operation"
+        if len(types) == 1:
+            return f"{errmsg} of {types[0]} {midstr} {endstr}"
+        if len(types) == 2:
+            a, b = types
+            return f"{errmsg} between {a} and {b} {midstr} {endstr}"
+    return errmsg
+
+
+def unary(f: operators.Operator, a):
+    """Compute the unary operation f(a)."""
+    if isinstance(a, Object):
+        meta = {}
+        for key, value in a._meta.items():
+            try:
+                v = f(value)
+            except TypeError as exc:
+                raise MetadataError(f, a, error='type', key=key) from exc
+            else:
+                meta[key] = v
+        return type(a)(f(a._data), **meta)
+    return f(a)
+
+
+def equality(f: operators.Operator, a, b):
+    """Compute the equality operation f(a, b)."""
+    if isinstance(a, Object) and isinstance(b, Object):
+        if a._meta != b._meta:
+            return f is operators.ne
+        return f(a._data, b._data)
+    if isinstance(a, Object):
+        if not a._meta:
+            return f(a._data, b)
+        return f is operators.ne
+    if isinstance(b, Object):
+        if not b._meta:
+            return f(a, b._data)
+        return f is operators.ne
+    return f(a, b)
+
+
+def ordering(f: operators.Operator, a, b):
+    """Compute the ordering operation f(a, b)."""
+    if isinstance(a, Object) and isinstance(b, Object):
+        if a._meta == b._meta:
+            return f(a._data, b._data)
+        raise MetadataError(f, a, b, error='unequal') from None
+    if isinstance(a, Object):
+        if not a._meta:
+            return f(a._data, b)
+        raise MetadataError(f, a, b, error='non-empty') from None
+    if isinstance(b, Object):
+        if not b._meta:
+            return f(a, b._data)
+        raise MetadataError(f, a, b, error='non-empty') from None
+    return f(a, b)
+
+
+def additive(f: operators.Operator, a, b):
+    """Compute the additive operation f(a, b)."""
+    if isinstance(a, Object) and isinstance(b, Object):
+        if a._meta == b._meta:
+            return type(a)(f(a._data, b._data), **a._meta)
+        raise MetadataError(f, a, b, error='unequal') from None
+    if isinstance(a, Object):
+        if not a._meta:
+            return type(a)(f(a._data, b))
+        raise MetadataError(f, a, b, error='non-empty') from None
+    if isinstance(b, Object):
+        if not b._meta:
+            return type(b)(f(a, b._data))
+        raise MetadataError(f, a, b, error='non-empty') from None
+    return f(a, b)
+
+
+def multiplicative(f:  operators.Operator, a, b):
+    """Compute the multiplicative operation f(a, b)."""
+    if isinstance(a, Object) and isinstance(b, Object):
+        keys = set(a._meta) & set(b._meta)
+        meta = {}
+        for key in keys:
+            try:
+                v = f(a._meta[key], b._meta[key])
+            except TypeError as exc:
+                raise MetadataError(f, a, b, error='type', key=key) from exc
+            else:
+                meta[key] = v
+        for key, value in a._meta.items():
+            if key not in keys:
+                meta[key] = value
+        for key, value in b._meta.items():
+            if key not in keys:
+                meta[key] = value
+        return type(a)(f(a._data, b._data), **meta)
+    if isinstance(a, Object):
+        meta = {}
+        for key, value in a._meta.items():
+            try:
+                v = f(value, b)
+            except TypeError as exc:
+                raise MetadataError(f, a, b, error='type', key=key) from exc
+            else:
+                meta[key] = v
+        return type(a)(f(a._data, b), **meta)
+    if isinstance(b, Object):
+        meta = {}
+        for key, value in b._meta.items():
+            try:
+                v = f(a, value)
+            except TypeError as exc:
+                raise MetadataError(f, a, b, error='type', key=key) from exc
+            else:
+                meta[key] = v
+        return type(b)(f(a, b._data), **meta)
+    return f(a, b)
+
+
