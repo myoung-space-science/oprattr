@@ -236,23 +236,15 @@ def ordering(f: operators.Operator, a, b):
     if isinstance(a, Object) and isinstance(b, Object):
         if a._meta == b._meta:
             return f(a._data, b._data)
-        raise TypeError(
-            f"Cannot compute {f} between objects with unequal metadata"
-        ) from None
+        _raise_metadata_exception(f, a, b, error='unequal')
     if isinstance(a, Object):
         if not a._meta:
             return f(a._data, b)
-        raise TypeError(
-            f"Cannot compute {f} between Object and {type(b)}"
-            " when Object has metadata"
-        ) from None
+        _raise_metadata_exception(f, a, b, error='non-empty')
     if isinstance(b, Object):
         if not b._meta:
             return f(a, b._data)
-        raise TypeError(
-            f"Cannot compute {f} between {type(a)} and Object"
-            " when Object has metadata"
-        ) from None
+        _raise_metadata_exception(f, a, b, error='non-empty')
     return f(a, b)
 
 
@@ -264,10 +256,12 @@ def unary(f: operators.Operator, a):
             try:
                 v = f(value)
             except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compute {f} of Object with attribute {key!r}"
-                    ", which does not support this operation"
-                ) from exc
+                _raise_metadata_exception(
+                    f, a,
+                    error='type',
+                    key=key,
+                    cause=exc,
+                )
             else:
                 meta[key] = v
         return type(a)(f(a._data), **meta)
@@ -279,23 +273,15 @@ def additive(f: operators.Operator, a, b):
     if isinstance(a, Object) and isinstance(b, Object):
         if a._meta == b._meta:
             return type(a)(f(a._data, b._data), **a._meta)
-        raise TypeError(
-            f"Cannot compute {f} between objects with unequal metadata"
-        ) from None
+        _raise_metadata_exception(f, a, b, error='unequal')
     if isinstance(a, Object):
         if not a._meta:
             return type(a)(f(a._data, b))
-        raise TypeError(
-            f"Cannot compute {f} between Object and {type(b)}"
-            " when Object has metadata"
-        ) from None
+        _raise_metadata_exception(f, a, b, error='non-empty')
     if isinstance(b, Object):
         if not b._meta:
             return type(b)(f(a, b._data))
-        raise TypeError(
-            f"Cannot compute {f} between {type(a)} and Object"
-            " when Object has metadata"
-        ) from None
+        _raise_metadata_exception(f, a, b, error='non-empty')
     return f(a, b)
 
 
@@ -308,10 +294,12 @@ def multiplicative(f:  operators.Operator, a, b):
             try:
                 v = f(a._meta[key], b._meta[key])
             except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compute {f} between objects with attribute {key!r}"
-                    ", which does note support this operation"
-                ) from exc
+                _raise_metadata_exception(
+                    f, a, b,
+                    error='type',
+                    key=key,
+                    cause=exc,
+                )
             else:
                 meta[key] = v
         for key, value in a._meta.items():
@@ -327,11 +315,12 @@ def multiplicative(f:  operators.Operator, a, b):
             try:
                 v = f(value, b)
             except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compute {f} between Object and {type(b)}"
-                    f" because attribute {key!r} does not support this"
-                    " operation"
-                ) from exc
+                _raise_metadata_exception(
+                    f, a, b,
+                    error='type',
+                    key=key,
+                    cause=exc,
+                )
             else:
                 meta[key] = v
         return type(a)(f(a._data, b), **meta)
@@ -341,13 +330,69 @@ def multiplicative(f:  operators.Operator, a, b):
             try:
                 v = f(a, value)
             except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compute {f} between {type(a)} and Object"
-                    f" because attribute {key!r} does not support this"
-                    " operation"
-                ) from exc
+                _raise_metadata_exception(
+                    f, a, b,
+                    error='type',
+                    key=key,
+                    cause=exc,
+                )
             else:
                 meta[key] = v
         return type(b)(f(a, b._data), **meta)
     return f(a, b)
+
+
+def _raise_metadata_exception(
+    f: operators.Operator,
+    *args,
+    error: typing.Optional[str]=None,
+    key: typing.Optional[str]=None,
+    cause: typing.Optional[Exception]=None,
+) -> typing.NoReturn:
+    """Raise a metadata-related `TypeError`."""
+    types = [type(arg) for arg in args]
+    try:
+        errmsg = _build_error_message(f, *types, error=error, key=key)
+    except Exception:
+        raise TypeError(f, *types) from cause
+    raise TypeError(errmsg) from cause
+
+
+def _build_error_message(
+    f: operators.Operator,
+    *types: type,
+    error: typing.Optional[str]=None,
+    key: typing.Optional[str]=None,
+) -> str:
+    """Helper for `_raise_metadata_exception`.
+    
+    This function should avoid raising an exception if at all possible, and
+    instead return the default error message, since it is already being called
+    as the result of an error elsewhere.
+    """
+    errmsg = f"Cannot compute {f}"
+    errstr = error.lower() if isinstance(error, str) else ''
+    if errstr == 'unequal':
+        return f"{errmsg} between objects with unequal metadata"
+    if errstr in {'non-empty', 'nonempty'}:
+        if len(types) == 2:
+            a, b = types
+            endstr = "because {} has metadata"
+            if issubclass(a, Object):
+                return f"{errmsg} between {a} and {b} {endstr.format(str(a))}"
+            if issubclass(b, Object):
+                return f"{errmsg} between {a} and {b} {endstr.format(str(b))}"
+    if errstr == 'type':
+        if key is None:
+            keystr = "a metadata attribute"
+        else:
+            keystr = f"metadata attribute {key!r}"
+        midstr = f"because {keystr}"
+        endstr = "does not support this operation"
+        if len(types) == 1:
+            return f"{errmsg} of {types[0]} {midstr} {endstr}"
+        if len(types) == 2:
+            a, b = types
+            return f"{errmsg} between {a} and {b} {midstr} {endstr}"
+    return errmsg
 
