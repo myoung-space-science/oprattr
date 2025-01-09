@@ -5,8 +5,8 @@ the `Object` class. It is meant as a supplement to rigorous tests.
 
 import attrops
 
-x = attrops.Object(1, name='A')
-y = attrops.Object(2, name='B')
+x = attrops.Operand(1, name='A')
+y = attrops.Operand(2, name='B')
 
 cases = (
     (attrops.operators.lt, x, y),
