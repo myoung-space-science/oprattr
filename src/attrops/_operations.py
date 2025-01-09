@@ -19,19 +19,15 @@ class MetadataError(TypeError):
         self._error = error
         self._key = key
 
-    def __repr__(self):
+    def __str__(self):
         """Called when handling the exception."""
         types = [type(arg) for arg in self.args]
-        try:
-            errmsg = _build_error_message(
-                self._f,
-                *types,
-                error=self._error,
-                key=self._key,
-            )
-        except Exception:
-            return super().__repr__(self._f, *types)
-        return errmsg
+        return _build_error_message(
+            self._f,
+            *types,
+            error=self._error,
+            key=self._key,
+        )
 
 
 def _build_error_message(
