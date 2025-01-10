@@ -135,7 +135,7 @@ def additive(f: operators.Operator, a, b):
     return f(a, b)
 
 
-def multiplicative(f:  operators.Operator, a, b):
+def multiplicative(f: operators.Operator, a, b):
     """Compute the multiplicative operation f(a, b)."""
     if isinstance(a, Object) and isinstance(b, Object):
         keys = set(a._meta) & set(b._meta)
