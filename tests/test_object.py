@@ -283,3 +283,82 @@ def test_exponential():
     with pytest.raises(TypeError):
         x(3) ** x(2, name=nA)
 
+
+@pytest.mark.xfail
+def test_trig():
+    """Test `numpy` trigonometric ufuncs."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_sqrt():
+    """Test `numpy.sqrt`."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_logs():
+    """Test `numpy` logarithmic ufuncs."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_squeeze():
+    """Test `numpy.squeeze`."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_axis_mean():
+    """Test `numpy.mean` along an axis."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_full_mean():
+    """Test the full `numpy.mean` of an entire array."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_axis_sum():
+    """Test `numpy.sum` along an axis."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_full_sum():
+    """Test `numpy.sum` of an entire array."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_axis_cumsum():
+    """Test `numpy.cumsum` along an axis."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_full_cumsum():
+    """Test `numpy.cumsum` of an entire array."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_transpose():
+    """Test `numpy.transpose`."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_gradient():
+    """Test `numpy.gradient`."""
+    assert False
+
+
+@pytest.mark.xfail
+def test_trapz():
+    """Test `numpy.trapz`."""
+    assert False
+
+
