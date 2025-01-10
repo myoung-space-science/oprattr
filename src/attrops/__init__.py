@@ -1,3 +1,4 @@
+import numbers
 import typing
 
 from . import operators
@@ -103,9 +104,11 @@ class Operand(_types.Object[T]):
 
     def __pow__(self, other):
         """Called for self ** other."""
-        return multiplicative(operators.pow, self, other)
+        if isinstance(other, numbers.Real):
+            return multiplicative(operators.pow, self, other)
+        return NotImplemented
 
     def __rpow__(self, other):
         """Called for other ** self."""
-        return multiplicative(operators.pow, other, self)
+        return super().__rpow__(other)
 
