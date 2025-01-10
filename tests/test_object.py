@@ -1,3 +1,4 @@
+import itertools
 import numbers
 
 import numpy
@@ -6,7 +7,7 @@ import pytest
 import attrops
 
 
-class Symbol:
+class Symbol(attrops.mixins.Numpy):
     """A symbolic test attribute."""
 
     def __init__(self, __x: str):
@@ -89,6 +90,76 @@ class Symbol:
         if isinstance(other, numbers.Real):
             return f"{self} ** {other}"
         return NotImplemented
+
+
+@Symbol.implements(numpy.sqrt)
+def symbol_sqrt(x: Symbol):
+    return f"numpy.sqrt({x})"
+
+
+@Symbol.implements(numpy.sin)
+def symbol_sin(x: Symbol):
+    return f"numpy.sin({x})"
+
+
+@Symbol.implements(numpy.cos)
+def symbol_cos(x: Symbol):
+    return f"numpy.cos({x})"
+
+
+@Symbol.implements(numpy.tan)
+def symbol_tan(x: Symbol):
+    return f"numpy.tan({x})"
+
+
+@Symbol.implements(numpy.log)
+def symbol_log(x: Symbol):
+    return f"numpy.log({x})"
+
+
+@Symbol.implements(numpy.log2)
+def symbol_log2(x: Symbol):
+    return f"numpy.log2({x})"
+
+
+@Symbol.implements(numpy.log10)
+def symbol_log10(x: Symbol):
+    return f"numpy.log10({x})"
+
+
+@Symbol.implements(numpy.squeeze)
+def symbol_squeeze(x: Symbol, **kwargs):
+    return f"numpy.squeeze({x})"
+
+
+@Symbol.implements(numpy.mean)
+def symbol_mean(x: Symbol, **kwargs):
+    return f"numpy.mean({x})"
+
+
+@Symbol.implements(numpy.sum)
+def symbol_sum(x: Symbol, **kwargs):
+    return f"numpy.sum({x})"
+
+
+@Symbol.implements(numpy.cumsum)
+def symbol_cumsum(x: Symbol, **kwargs):
+    return f"numpy.cumsum({x})"
+
+
+@Symbol.implements(numpy.transpose)
+def symbol_transpose(x: Symbol, **kwargs):
+    return f"numpy.transpose({x})"
+
+
+@Symbol.implements(numpy.gradient)
+def symbol_gradient(x: Symbol, **kwargs):
+    return f"numpy.gradient({x})"
+
+
+@Symbol.implements(numpy.trapezoid)
+def symbol_trapezoid(x: Symbol, **kwargs):
+    return f"numpy.trapezoid({x})"
 
 
 def symbolic_binary(a, op, b):
@@ -284,81 +355,160 @@ def test_exponential():
         x(3) ** x(2, name=nA)
 
 
-@pytest.mark.xfail
 def test_trig():
     """Test `numpy` trigonometric ufuncs."""
-    assert False
+    nA = Symbol('A')
+    v = numpy.pi / 3
+    this = x(v, name=nA)
+    that = numpy.sin(this)
+    assert isinstance(that, attrops.Operand)
+    assert that == x(numpy.sin(v), name=Symbol('numpy.sin(A)'))
+    that = numpy.cos(this)
+    assert isinstance(that, attrops.Operand)
+    assert that == x(numpy.cos(v), name=Symbol('numpy.cos(A)'))
+    that = numpy.tan(this)
+    assert isinstance(that, attrops.Operand)
+    assert that == x(numpy.tan(v), name=Symbol('numpy.tan(A)'))
 
 
-@pytest.mark.xfail
 def test_sqrt():
     """Test `numpy.sqrt`."""
-    assert False
+    this = x(4, name=Symbol('A'))
+    that = numpy.sqrt(this)
+    assert isinstance(that, attrops.Operand)
+    assert that == x(2, name=Symbol('numpy.sqrt(A)'))
 
 
-@pytest.mark.xfail
 def test_logs():
     """Test `numpy` logarithmic ufuncs."""
-    assert False
+    nA = Symbol('A')
+    v = 10.0
+    this = x(v, name=nA)
+    that = numpy.log(this)
+    assert isinstance(that, attrops.Operand)
+    assert that == x(numpy.log(v), name=Symbol('numpy.log(A)'))
+    that = numpy.log2(this)
+    assert isinstance(that, attrops.Operand)
+    assert that == x(numpy.log2(v), name=Symbol('numpy.log2(A)'))
+    that = numpy.log10(this)
+    assert isinstance(that, attrops.Operand)
+    assert that == x(numpy.log10(v), name=Symbol('numpy.log10(A)'))
 
 
-@pytest.mark.xfail
 def test_squeeze():
     """Test `numpy.squeeze`."""
-    assert False
+    nA = Symbol('A')
+    nR = Symbol('numpy.squeeze(A)')
+    v = numpy.array([[[1], [2], [3]]])
+    this = x(v, name=nA)
+    that = numpy.squeeze(this)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.squeeze(v), name=nR))
+    that = numpy.squeeze(this, axis=0)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.squeeze(v, axis=0), name=nR))
+    that = numpy.squeeze(this, axis=-1)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.squeeze(v, axis=-1), name=nR))
 
 
-@pytest.mark.xfail
-def test_axis_mean():
-    """Test `numpy.mean` along an axis."""
-    assert False
+def test_mean():
+    """Test `numpy.mean`."""
+    nA = Symbol('A')
+    nR = Symbol('numpy.mean(A)')
+    v = numpy.arange(3*4*5).reshape(3, 4, 5)
+    this = x(v, name=nA)
+    that = numpy.mean(this)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.mean(v), name=nR))
+    that = numpy.mean(this, axis=0)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.mean(v, axis=0), name=nR))
+    that = numpy.mean(this, axis=-1)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.mean(v, axis=-1), name=nR))
 
 
-@pytest.mark.xfail
-def test_full_mean():
-    """Test the full `numpy.mean` of an entire array."""
-    assert False
+def test_sum():
+    """Test `numpy.sum`."""
+    nA = Symbol('A')
+    nR = Symbol('numpy.sum(A)')
+    v = numpy.arange(3*4*5).reshape(3, 4, 5)
+    this = x(v, name=nA)
+    that = numpy.sum(this)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.sum(v), name=nR))
+    that = numpy.sum(this, axis=0)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.sum(v, axis=0), name=nR))
+    that = numpy.sum(this, axis=-1)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.sum(v, axis=-1), name=nR))
 
 
-@pytest.mark.xfail
-def test_axis_sum():
-    """Test `numpy.sum` along an axis."""
-    assert False
+def test_cumsum():
+    """Test `numpy.cumsum`."""
+    nA = Symbol('A')
+    nR = Symbol('numpy.cumsum(A)')
+    v = numpy.arange(3*4*5).reshape(3, 4, 5)
+    this = x(v, name=nA)
+    that = numpy.cumsum(this)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.cumsum(v), name=nR))
+    that = numpy.cumsum(this, axis=0)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.cumsum(v, axis=0), name=nR))
+    that = numpy.cumsum(this, axis=-1)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.cumsum(v, axis=-1), name=nR))
 
 
-@pytest.mark.xfail
-def test_full_sum():
-    """Test `numpy.sum` of an entire array."""
-    assert False
-
-
-@pytest.mark.xfail
-def test_axis_cumsum():
-    """Test `numpy.cumsum` along an axis."""
-    assert False
-
-
-@pytest.mark.xfail
-def test_full_cumsum():
-    """Test `numpy.cumsum` of an entire array."""
-    assert False
-
-
-@pytest.mark.xfail
 def test_transpose():
     """Test `numpy.transpose`."""
-    assert False
+    nA = Symbol('A')
+    nR = Symbol('numpy.transpose(A)')
+    v = numpy.arange(3*4*5).reshape(3, 4, 5)
+    this = x(v, name=nA)
+    that = numpy.transpose(this)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.transpose(v), name=nR))
+    for axes in itertools.permutations(range(v.ndim)):
+        that = numpy.transpose(this, axes=axes)
+        assert isinstance(that, attrops.Operand)
+        expected = x(numpy.transpose(v, axes=axes), name=nR)
+        assert numpy.array_equal(that, expected)
 
 
-@pytest.mark.xfail
 def test_gradient():
     """Test `numpy.gradient`."""
-    assert False
+    nA = Symbol('A')
+    nR = Symbol('numpy.gradient(A)')
+    v = numpy.arange(3*4*5).reshape(3, 4, 5)
+    this = x(v, name=nA)
+    that = numpy.gradient(this)
+    grad = numpy.gradient(v)
+    for t, g in zip(that, grad):
+        assert isinstance(t, attrops.Operand)
+        assert numpy.array_equal(t, x(g, name=nR))
+    for axis in range(v.ndim):
+        that = numpy.gradient(this, axis=axis)
+        assert isinstance(that, attrops.Operand)
+        grad = numpy.gradient(v, axis=axis)
+        assert numpy.array_equal(that, x(grad, name=nR))
 
 
-@pytest.mark.xfail
-def test_trapz():
-    """Test `numpy.trapz`."""
-    assert False
-
+def test_trapezoid():
+    """Test `numpy.trapezoid`."""
+    nA = Symbol('A')
+    nR = Symbol('numpy.trapezoid(A)')
+    v = numpy.arange(3*4*5).reshape(3, 4, 5)
+    this = x(v, name=nA)
+    that = numpy.trapezoid(this)
+    assert isinstance(that, attrops.Operand)
+    assert numpy.array_equal(that, x(numpy.trapezoid(v), name=nR))
+    for axis in range(v.ndim):
+        that = numpy.trapezoid(this, axis=axis)
+        assert isinstance(that, attrops.Operand)
+        trap = numpy.trapezoid(v, axis=axis)
+        assert numpy.array_equal(that, x(trap, name=nR))
 
