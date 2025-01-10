@@ -227,9 +227,9 @@ class Numpy:
     def _get_numpy_args(self, args):
         """Convert `args` to operands of a `numpy` function.
 
-        This method will call `~_get_numpy_arg` on each member of `args` in
-        order to build a `tuple` of suitable operands. Subclasses may overload
-        `~_get_numpy_arg` to customize access to their data attribute.
+        This method will call `~_get_arg_data` on each member of `args` in order
+        to build a `tuple` of suitable operands. Subclasses may overload
+        `~_get_arg_data` to customize access to their data attribute.
         """
         return tuple(self._get_arg_data(arg) for arg in args)
 
