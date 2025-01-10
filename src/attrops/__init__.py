@@ -123,128 +123,55 @@ class Operand(_types.Object[T], mixins.Numpy):
 @Operand.implements(numpy.sqrt)
 def sqrt(x: Operand[T]):
     """Called for numpy.sqrt(x)."""
-    data = numpy.sqrt(x._data)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.sqrt(value)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.sqrt(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
+    return ufunc(numpy.sqrt, x)
 
 
 @Operand.implements(numpy.sin)
 def sin(x: Operand[T]):
     """Called for numpy.sin(x)."""
-    data = numpy.sin(x._data)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.sin(value)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.sin(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
+    return ufunc(numpy.sin, x)
 
 
 @Operand.implements(numpy.cos)
 def cos(x: Operand[T]):
     """Called for numpy.cos(x)."""
-    data = numpy.cos(x._data)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.cos(value)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.cos(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
+    return ufunc(numpy.cos, x)
 
 
 @Operand.implements(numpy.tan)
 def tan(x: Operand[T]):
     """Called for numpy.tan(x)."""
-    data = numpy.tan(x._data)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.tan(value)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.tan(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
+    return ufunc(numpy.tan, x)
 
 
 @Operand.implements(numpy.log)
 def log(x: Operand[T]):
     """Called for numpy.log(x)."""
-    data = numpy.log(x._data)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.log(value)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.log(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
+    return ufunc(numpy.log, x)
 
 
 @Operand.implements(numpy.log2)
 def log2(x: Operand[T]):
     """Called for numpy.log2(x)."""
-    data = numpy.log2(x._data)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.log2(value)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.log2(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
+    return ufunc(numpy.log2, x)
 
 
 @Operand.implements(numpy.log10)
 def log10(x: Operand[T]):
     """Called for numpy.log10(x)."""
-    data = numpy.log10(x._data)
+    return ufunc(numpy.log10, x)
+
+
+def ufunc(f: numpy.ufunc, x: Operand[T]):
+    """Called to compute f(x) via a numpy universal function."""
+    data = f(x._data)
     meta = {}
     for key, value in x._meta.items():
         try:
-            v = numpy.log10(value)
+            v = f(value)
         except TypeError as exc:
             raise TypeError(
-                "Cannot compute numpy.log10(x)"
+                f"Cannot compute numpy.{f.__qualname__}(x)"
                 f" because metadata attribute {key!r}"
                 " does not support this operation"
             ) from exc
