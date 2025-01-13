@@ -155,16 +155,16 @@ def gradient(x: Operand[T], *args, **kwargs):
     return type(x)(data, **meta)
 
 
-def ufunc(f: numpy.ufunc):
-    """Implement a numpy universal function for objects with metadata."""
+def wrapnumpy(f: typing.Callable):
+    """Implement a numpy function for objects with metadata."""
     @functools.wraps(f)
-    def method(x: Operand[T]):
-        """Apply a numpy universal function to x."""
-        data = f(x._data)
+    def method(x: Operand[T], **kwargs):
+        """Apply a numpy function to x."""
+        data = f(x._data, **kwargs)
         meta = {}
         for key, value in x._meta.items():
             try:
-                v = f(value)
+                v = f(value, **kwargs)
             except TypeError as exc:
                 raise TypeError(
                     f"Cannot compute numpy.{f.__qualname__}(x)"
@@ -188,32 +188,6 @@ _OPERAND_UFUNCS = (
 )
 
 
-for f in _OPERAND_UFUNCS:
-    Operand.implement(f, ufunc(f))
-
-
-def function(f: typing.Callable):
-    """Implement a numpy public function for objects with metadata."""
-    @functools.wraps(f)
-    def method(x: Operand[T], **kwargs):
-        """Apply a numpy public function to x."""
-        data = f(x._data, **kwargs)
-        meta = {}
-        for key, value in x._meta.items():
-            try:
-                v = f(value, **kwargs)
-            except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compute numpy.{f.__qualname__}(x)"
-                    f" because metadata attribute {key!r}"
-                    " does not support this operation"
-                ) from exc
-            else:
-                meta[key] = v
-        return type(x)(data, **meta)
-    return method
-
-
 _OPERAND_FUNCTIONS = (
     numpy.squeeze,
     numpy.mean,
@@ -224,7 +198,7 @@ _OPERAND_FUNCTIONS = (
 )
 
 
-for f in _OPERAND_FUNCTIONS:
-    Operand.implement(f, function(f))
+for f in _OPERAND_UFUNCS + _OPERAND_FUNCTIONS:
+    Operand.implement(f, wrapnumpy(f))
 
 
