@@ -1,3 +1,4 @@
+import functools
 import numbers
 import typing
 
@@ -120,66 +121,6 @@ class Operand(_types.Object[T], mixins.Numpy):
         return numpy.array(self._data, *args, **kwargs)
 
 
-@Operand.implementation(numpy.sqrt)
-def sqrt(x: Operand[T]):
-    """Called for numpy.sqrt(x)."""
-    return ufunc(numpy.sqrt, x)
-
-
-@Operand.implementation(numpy.sin)
-def sin(x: Operand[T]):
-    """Called for numpy.sin(x)."""
-    return ufunc(numpy.sin, x)
-
-
-@Operand.implementation(numpy.cos)
-def cos(x: Operand[T]):
-    """Called for numpy.cos(x)."""
-    return ufunc(numpy.cos, x)
-
-
-@Operand.implementation(numpy.tan)
-def tan(x: Operand[T]):
-    """Called for numpy.tan(x)."""
-    return ufunc(numpy.tan, x)
-
-
-@Operand.implementation(numpy.log)
-def log(x: Operand[T]):
-    """Called for numpy.log(x)."""
-    return ufunc(numpy.log, x)
-
-
-@Operand.implementation(numpy.log2)
-def log2(x: Operand[T]):
-    """Called for numpy.log2(x)."""
-    return ufunc(numpy.log2, x)
-
-
-@Operand.implementation(numpy.log10)
-def log10(x: Operand[T]):
-    """Called for numpy.log10(x)."""
-    return ufunc(numpy.log10, x)
-
-
-def ufunc(f: numpy.ufunc, x: Operand[T]):
-    """Called to compute f(x) via a numpy universal function."""
-    data = f(x._data)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = f(value)
-        except TypeError as exc:
-            raise TypeError(
-                f"Cannot compute numpy.{f.__qualname__}(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
-
-
 @Operand.implementation(numpy.array_equal)
 def array_equal(
     x: numpy.typing.ArrayLike,
@@ -188,101 +129,6 @@ def array_equal(
 ) -> bool:
     """Called for numpy.array_equal(x, y)"""
     return numpy.array_equal(numpy.array(x), numpy.array(y), **kwargs)
-
-
-@Operand.implementation(numpy.squeeze)
-def squeeze(x: Operand[T], **kwargs):
-    """Called for numpy.squeeze(x)."""
-    data = numpy.squeeze(x._data, **kwargs)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.squeeze(value, **kwargs)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.squeeze(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
-
-
-@Operand.implementation(numpy.mean)
-def mean(x: Operand[T], **kwargs):
-    """Called for numpy.mean(x)."""
-    data = numpy.mean(x._data, **kwargs)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.mean(value, **kwargs)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.mean(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
-
-
-@Operand.implementation(numpy.sum)
-def sum(x: Operand[T], **kwargs):
-    """Called for numpy.sum(x)."""
-    data = numpy.sum(x._data, **kwargs)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.sum(value, **kwargs)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.sum(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
-
-
-@Operand.implementation(numpy.cumsum)
-def cumsum(x: Operand[T], **kwargs):
-    """Called for numpy.cumsum(x)."""
-    data = numpy.cumsum(x._data, **kwargs)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.cumsum(value, **kwargs)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.cumsum(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
-
-
-@Operand.implementation(numpy.transpose)
-def transpose(x: Operand[T], **kwargs):
-    """Called for numpy.transpose(x)."""
-    data = numpy.transpose(x._data, **kwargs)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.transpose(value, **kwargs)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.transpose(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
 
 
 @Operand.implementation(numpy.gradient)
@@ -309,22 +155,76 @@ def gradient(x: Operand[T], *args, **kwargs):
     return type(x)(data, **meta)
 
 
-@Operand.implementation(numpy.trapezoid)
-def trapezoid(x: Operand[T], **kwargs):
-    """Called for numpy.trapezoid(x)."""
-    data = numpy.trapezoid(x._data, **kwargs)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.trapezoid(value, **kwargs)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.trapezoid(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
-    return type(x)(data, **meta)
+def ufunc(f: numpy.ufunc):
+    """Implement a numpy universal function for objects with metadata."""
+    @functools.wraps(f)
+    def method(x: Operand[T]):
+        """Apply a numpy universal function to x."""
+        data = f(x._data)
+        meta = {}
+        for key, value in x._meta.items():
+            try:
+                v = f(value)
+            except TypeError as exc:
+                raise TypeError(
+                    f"Cannot compute numpy.{f.__qualname__}(x)"
+                    f" because metadata attribute {key!r}"
+                    " does not support this operation"
+                ) from exc
+            else:
+                meta[key] = v
+        return type(x)(data, **meta)
+    return method
+
+
+_OPERAND_UFUNCS = (
+    numpy.sqrt,
+    numpy.sin,
+    numpy.cos,
+    numpy.tan,
+    numpy.log,
+    numpy.log2,
+    numpy.log10,
+)
+
+
+for f in _OPERAND_UFUNCS:
+    Operand.implement(f, ufunc(f))
+
+
+def function(f: typing.Callable):
+    """Implement a numpy public function for objects with metadata."""
+    @functools.wraps(f)
+    def method(x: Operand[T], **kwargs):
+        """Apply a numpy public function to x."""
+        data = f(x._data, **kwargs)
+        meta = {}
+        for key, value in x._meta.items():
+            try:
+                v = f(value, **kwargs)
+            except TypeError as exc:
+                raise TypeError(
+                    f"Cannot compute numpy.{f.__qualname__}(x)"
+                    f" because metadata attribute {key!r}"
+                    " does not support this operation"
+                ) from exc
+            else:
+                meta[key] = v
+        return type(x)(data, **meta)
+    return method
+
+
+_OPERAND_FUNCTIONS = (
+    numpy.squeeze,
+    numpy.mean,
+    numpy.sum,
+    numpy.cumsum,
+    numpy.transpose,
+    numpy.trapezoid,
+)
+
+
+for f in _OPERAND_FUNCTIONS:
+    Operand.implement(f, function(f))
 
 
