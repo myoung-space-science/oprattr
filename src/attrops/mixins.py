@@ -328,6 +328,10 @@ class Numpy:
             >>> numpy.mean(v, axis=0)
             ...
             TypeError: Cannot pass keywords to numpy.mean with Array
+
+        See Also
+        --------
+        `~implements`
         """
         if not callable(numpy_function):
             raise TypeError(
@@ -343,4 +347,69 @@ class Numpy:
             cls._FUNCTIONS[numpy_function] = user_function
             return user_function
         return decorator
+
+    @classmethod
+    def implement(
+        cls,
+        numpy_function: typing.Callable,
+        user_function: UserFunction,
+        /,
+    ) -> None:
+        """Implement a `numpy` function via a given user function.
+
+        This method serves as an alternative to the class method
+        `implementation`, which is primarily meant to be used as a decorator.
+        This method allows the user to directly associate a custom
+        implementation with the target `numpy` function.
+
+        Parameters
+        ----------
+        numpy_function : callable
+            The `numpy` universal or public function to implement.
+
+        user_function: callable
+            The custom implementation to associate with `numpy_function`.
+
+        Examples
+        --------
+        Here is an alternative to the `~implementation` example usage:
+
+        ```
+            def mean(a: Array, **kwargs) -> Array:
+                if kwargs:
+                    msg = "Cannot pass keywords to numpy.mean with Array" raise
+                    TypeError(msg)
+                return numpy.sum(a) / len(a)
+
+            Array.implement(numpy.mean, mean)
+        ```
+
+        However, a more useful application may be to associate multiple `numpy`
+        functions with a single custom implementation:
+
+        ```
+            def trig(f: numpy.ufunc):
+                def method(a: Array):
+                    ... # custom implementation
+                return method
+
+            for f in {numpy.sin, numpy.cos, numpy.tan}:
+                Array.implement(f, trig(f))
+        ```
+
+        See Also
+        --------
+        `~implementation`
+        """
+        if not callable(numpy_function):
+            raise TypeError(
+                "The target operation of a custom numpy implementation"
+                " must be callable"
+            ) from None
+        if cls._FUNCTIONS is None:
+            raise NotImplementedError(
+                f"Type {cls} does not support custom implementations"
+                " of numpy functions"
+            ) from None
+        cls._FUNCTIONS[numpy_function] = user_function
 
