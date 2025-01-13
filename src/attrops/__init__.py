@@ -120,43 +120,43 @@ class Operand(_types.Object[T], mixins.Numpy):
         return numpy.array(self._data, *args, **kwargs)
 
 
-@Operand.implements(numpy.sqrt)
+@Operand.implementation(numpy.sqrt)
 def sqrt(x: Operand[T]):
     """Called for numpy.sqrt(x)."""
     return ufunc(numpy.sqrt, x)
 
 
-@Operand.implements(numpy.sin)
+@Operand.implementation(numpy.sin)
 def sin(x: Operand[T]):
     """Called for numpy.sin(x)."""
     return ufunc(numpy.sin, x)
 
 
-@Operand.implements(numpy.cos)
+@Operand.implementation(numpy.cos)
 def cos(x: Operand[T]):
     """Called for numpy.cos(x)."""
     return ufunc(numpy.cos, x)
 
 
-@Operand.implements(numpy.tan)
+@Operand.implementation(numpy.tan)
 def tan(x: Operand[T]):
     """Called for numpy.tan(x)."""
     return ufunc(numpy.tan, x)
 
 
-@Operand.implements(numpy.log)
+@Operand.implementation(numpy.log)
 def log(x: Operand[T]):
     """Called for numpy.log(x)."""
     return ufunc(numpy.log, x)
 
 
-@Operand.implements(numpy.log2)
+@Operand.implementation(numpy.log2)
 def log2(x: Operand[T]):
     """Called for numpy.log2(x)."""
     return ufunc(numpy.log2, x)
 
 
-@Operand.implements(numpy.log10)
+@Operand.implementation(numpy.log10)
 def log10(x: Operand[T]):
     """Called for numpy.log10(x)."""
     return ufunc(numpy.log10, x)
@@ -180,7 +180,7 @@ def ufunc(f: numpy.ufunc, x: Operand[T]):
     return type(x)(data, **meta)
 
 
-@Operand.implements(numpy.array_equal)
+@Operand.implementation(numpy.array_equal)
 def array_equal(
     x: numpy.typing.ArrayLike,
     y: numpy.typing.ArrayLike,
@@ -190,7 +190,7 @@ def array_equal(
     return numpy.array_equal(numpy.array(x), numpy.array(y), **kwargs)
 
 
-@Operand.implements(numpy.squeeze)
+@Operand.implementation(numpy.squeeze)
 def squeeze(x: Operand[T], **kwargs):
     """Called for numpy.squeeze(x)."""
     data = numpy.squeeze(x._data, **kwargs)
@@ -209,7 +209,7 @@ def squeeze(x: Operand[T], **kwargs):
     return type(x)(data, **meta)
 
 
-@Operand.implements(numpy.mean)
+@Operand.implementation(numpy.mean)
 def mean(x: Operand[T], **kwargs):
     """Called for numpy.mean(x)."""
     data = numpy.mean(x._data, **kwargs)
@@ -228,7 +228,7 @@ def mean(x: Operand[T], **kwargs):
     return type(x)(data, **meta)
 
 
-@Operand.implements(numpy.sum)
+@Operand.implementation(numpy.sum)
 def sum(x: Operand[T], **kwargs):
     """Called for numpy.sum(x)."""
     data = numpy.sum(x._data, **kwargs)
@@ -247,7 +247,7 @@ def sum(x: Operand[T], **kwargs):
     return type(x)(data, **meta)
 
 
-@Operand.implements(numpy.cumsum)
+@Operand.implementation(numpy.cumsum)
 def cumsum(x: Operand[T], **kwargs):
     """Called for numpy.cumsum(x)."""
     data = numpy.cumsum(x._data, **kwargs)
@@ -266,7 +266,7 @@ def cumsum(x: Operand[T], **kwargs):
     return type(x)(data, **meta)
 
 
-@Operand.implements(numpy.transpose)
+@Operand.implementation(numpy.transpose)
 def transpose(x: Operand[T], **kwargs):
     """Called for numpy.transpose(x)."""
     data = numpy.transpose(x._data, **kwargs)
@@ -285,7 +285,7 @@ def transpose(x: Operand[T], **kwargs):
     return type(x)(data, **meta)
 
 
-@Operand.implements(numpy.gradient)
+@Operand.implementation(numpy.gradient)
 def gradient(x: Operand[T], *args, **kwargs):
     """Called for numpy.gradient(x)."""
     data = numpy.gradient(x._data, *args, **kwargs)
@@ -309,7 +309,7 @@ def gradient(x: Operand[T], *args, **kwargs):
     return type(x)(data, **meta)
 
 
-@Operand.implements(numpy.trapezoid)
+@Operand.implementation(numpy.trapezoid)
 def trapezoid(x: Operand[T], **kwargs):
     """Called for numpy.trapezoid(x)."""
     data = numpy.trapezoid(x._data, **kwargs)

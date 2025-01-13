@@ -92,72 +92,72 @@ class Symbol(attrops.mixins.Numpy):
         return NotImplemented
 
 
-@Symbol.implements(numpy.sqrt)
+@Symbol.implementation(numpy.sqrt)
 def symbol_sqrt(x: Symbol):
     return f"numpy.sqrt({x})"
 
 
-@Symbol.implements(numpy.sin)
+@Symbol.implementation(numpy.sin)
 def symbol_sin(x: Symbol):
     return f"numpy.sin({x})"
 
 
-@Symbol.implements(numpy.cos)
+@Symbol.implementation(numpy.cos)
 def symbol_cos(x: Symbol):
     return f"numpy.cos({x})"
 
 
-@Symbol.implements(numpy.tan)
+@Symbol.implementation(numpy.tan)
 def symbol_tan(x: Symbol):
     return f"numpy.tan({x})"
 
 
-@Symbol.implements(numpy.log)
+@Symbol.implementation(numpy.log)
 def symbol_log(x: Symbol):
     return f"numpy.log({x})"
 
 
-@Symbol.implements(numpy.log2)
+@Symbol.implementation(numpy.log2)
 def symbol_log2(x: Symbol):
     return f"numpy.log2({x})"
 
 
-@Symbol.implements(numpy.log10)
+@Symbol.implementation(numpy.log10)
 def symbol_log10(x: Symbol):
     return f"numpy.log10({x})"
 
 
-@Symbol.implements(numpy.squeeze)
+@Symbol.implementation(numpy.squeeze)
 def symbol_squeeze(x: Symbol, **kwargs):
     return f"numpy.squeeze({x})"
 
 
-@Symbol.implements(numpy.mean)
+@Symbol.implementation(numpy.mean)
 def symbol_mean(x: Symbol, **kwargs):
     return f"numpy.mean({x})"
 
 
-@Symbol.implements(numpy.sum)
+@Symbol.implementation(numpy.sum)
 def symbol_sum(x: Symbol, **kwargs):
     return f"numpy.sum({x})"
 
 
-@Symbol.implements(numpy.cumsum)
+@Symbol.implementation(numpy.cumsum)
 def symbol_cumsum(x: Symbol, **kwargs):
     return f"numpy.cumsum({x})"
 
 
-@Symbol.implements(numpy.transpose)
+@Symbol.implementation(numpy.transpose)
 def symbol_transpose(x: Symbol, **kwargs):
     return f"numpy.transpose({x})"
 
 
-@Symbol.implements(numpy.gradient)
+@Symbol.implementation(numpy.gradient)
 def symbol_gradient(x: Symbol, **kwargs):
     return f"numpy.gradient({x})"
 
 
-@Symbol.implements(numpy.trapezoid)
+@Symbol.implementation(numpy.trapezoid)
 def symbol_trapezoid(x: Symbol, **kwargs):
     return f"numpy.trapezoid({x})"
 

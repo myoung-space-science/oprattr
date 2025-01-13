@@ -19,7 +19,7 @@ class Numpy:
     universal functions ("ufuncs"; e.g., `numpy.sqrt`) by overloading
     `_apply_ufunc`, and may implement support for `numpy` public functions
     (e.g., `numpy.squeeze`) by overloading `_apply_function` and registering
-    individual function implementations via `implements`.
+    individual function implementations via `implementation`.
 
     It is important to note that the use cases of this class extend beyond
     array-like objects. Both single- and multi-valued objects can benefit from
@@ -71,11 +71,12 @@ class Numpy:
           implementation, this method applies it and returns the result. If
           there is no custom implementation, this method passes control to
           `_apply_ufunc`, to allow subclass customization.
-        - See `implements` for additional guidance on custom implementations.
+        - See `implementation` for additional guidance on custom
+          implementations.
 
         See Also
         --------
-        `implements`
+        `implementation`
             Class method for registering custom ufunc implementations.
 
         `_apply_ufunc`
@@ -104,8 +105,8 @@ class Numpy:
         - Subclasses that wish to customize support for ufuncs should overload
           this method instead of `__array_ufunc__`.
         - Subclasses should prefer to define custom implementations of specific
-          universal functions and register each via `implements`, rather than
-          implementing function-specific logic in this method, since
+          universal functions and register each via `implementation`, rather
+          than implementing function-specific logic in this method, since
           `__array_ufunc__` will check for a custom implementation of a given
           function before calling this method.
         - The default implementation of this method applies the given ufunc to
@@ -114,7 +115,7 @@ class Numpy:
 
         See Also
         --------
-        `implements`
+        `implementation`
             Class method for registering custom ufunc implementations.
 
         `__array_ufunc__`
@@ -154,11 +155,12 @@ class Numpy:
           implementation, this method applies it and returns the result. If
           there is no custom implementation, this method passes control to
           `_apply_function`, to allow subclass customization.
-        - See `implements` for additional guidance on custom implementations.
+        - See `implementation` for additional guidance on custom
+          implementations.
 
         See Also
         --------
-        `implements`
+        `implementation`
             Class method for registering custom function implementations.
 
         `_apply_function`
@@ -180,7 +182,7 @@ class Numpy:
         - Subclasses that wish to customize support for public functions should
           overload this method instead of `__array_function__`.
         - Subclasses should prefer to define custom implementations of specific
-          public functions and register each via `implements`, rather than
+          public functions and register each via `implementation`, rather than
           implementing function-specific logic in this method, since
           `__array_function__` will check for a custom implementation of a given
           function before calling this method.
@@ -192,7 +194,7 @@ class Numpy:
 
         See Also
         --------
-        `implements`
+        `implementation`
             Class method for registering custom ufunc implementations.
 
         `__array_function__`
@@ -285,7 +287,7 @@ class Numpy:
     """Internal collection of custom `numpy` function implementations."""
 
     @classmethod
-    def implements(cls, numpy_function: typing.Callable, /):
+    def implementation(cls, numpy_function: typing.Callable, /):
         """Register a custom implementation of this `numpy` function.
 
         Parameters
@@ -309,7 +311,7 @@ class Numpy:
         version that accepts no keyword arguments:
 
         ```
-            @Array.implements(numpy.mean)
+            @Array.implementation(numpy.mean)
             def mean(a: Array, **kwargs) -> Array:
                 if kwargs:
                     msg = "Cannot pass keywords to numpy.mean with Array" raise
