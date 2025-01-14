@@ -4,10 +4,10 @@ import numbers
 import numpy
 import pytest
 
-import attrops
+import oprattr
 
 
-class Symbol(attrops.mixins.Numpy):
+class Symbol(oprattr.mixins.Numpy):
     """A symbolic test attribute."""
 
     def __init__(self, __x: str):
@@ -170,24 +170,24 @@ def symbolic_binary(a, op, b):
 
 def test_initialize():
     """Test rules for initializing defined types."""
-    assert isinstance(attrops.Operand(+1), attrops.Operand)
-    assert isinstance(attrops.Operand(+1.0), attrops.Operand)
-    assert isinstance(attrops.Operand(-1), attrops.Operand)
-    assert isinstance(attrops.Operand(-1.0), attrops.Operand)
-    assert isinstance(attrops.Operand(numpy.array([1, 2])), attrops.Operand)
+    assert isinstance(oprattr.Operand(+1), oprattr.Operand)
+    assert isinstance(oprattr.Operand(+1.0), oprattr.Operand)
+    assert isinstance(oprattr.Operand(-1), oprattr.Operand)
+    assert isinstance(oprattr.Operand(-1.0), oprattr.Operand)
+    assert isinstance(oprattr.Operand(numpy.array([1, 2])), oprattr.Operand)
     with pytest.raises(TypeError):
-        attrops.Operand([1, 2])
+        oprattr.Operand([1, 2])
     with pytest.raises(TypeError):
-        attrops.Operand((1, 2))
+        oprattr.Operand((1, 2))
     with pytest.raises(TypeError):
-        attrops.Operand({1, 2})
+        oprattr.Operand({1, 2})
     with pytest.raises(TypeError):
-        attrops.Operand("+1")
+        oprattr.Operand("+1")
 
 
 def x(data, **metadata):
     """Convenience factory function."""
-    return attrops.Operand(data, **metadata)
+    return oprattr.Operand(data, **metadata)
 
 
 def test_equality():
@@ -361,13 +361,13 @@ def test_trig():
     v = numpy.pi / 3
     this = x(v, name=nA)
     that = numpy.sin(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert that == x(numpy.sin(v), name=Symbol('numpy.sin(A)'))
     that = numpy.cos(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert that == x(numpy.cos(v), name=Symbol('numpy.cos(A)'))
     that = numpy.tan(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert that == x(numpy.tan(v), name=Symbol('numpy.tan(A)'))
 
 
@@ -375,7 +375,7 @@ def test_sqrt():
     """Test `numpy.sqrt`."""
     this = x(4, name=Symbol('A'))
     that = numpy.sqrt(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert that == x(2, name=Symbol('numpy.sqrt(A)'))
 
 
@@ -385,13 +385,13 @@ def test_logs():
     v = 10.0
     this = x(v, name=nA)
     that = numpy.log(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert that == x(numpy.log(v), name=Symbol('numpy.log(A)'))
     that = numpy.log2(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert that == x(numpy.log2(v), name=Symbol('numpy.log2(A)'))
     that = numpy.log10(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert that == x(numpy.log10(v), name=Symbol('numpy.log10(A)'))
 
 
@@ -402,13 +402,13 @@ def test_squeeze():
     v = numpy.array([[[1], [2], [3]]])
     this = x(v, name=nA)
     that = numpy.squeeze(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.squeeze(v), name=nR))
     that = numpy.squeeze(this, axis=0)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.squeeze(v, axis=0), name=nR))
     that = numpy.squeeze(this, axis=-1)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.squeeze(v, axis=-1), name=nR))
 
 
@@ -419,13 +419,13 @@ def test_mean():
     v = numpy.arange(3*4*5).reshape(3, 4, 5)
     this = x(v, name=nA)
     that = numpy.mean(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.mean(v), name=nR))
     that = numpy.mean(this, axis=0)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.mean(v, axis=0), name=nR))
     that = numpy.mean(this, axis=-1)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.mean(v, axis=-1), name=nR))
 
 
@@ -436,13 +436,13 @@ def test_sum():
     v = numpy.arange(3*4*5).reshape(3, 4, 5)
     this = x(v, name=nA)
     that = numpy.sum(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.sum(v), name=nR))
     that = numpy.sum(this, axis=0)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.sum(v, axis=0), name=nR))
     that = numpy.sum(this, axis=-1)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.sum(v, axis=-1), name=nR))
 
 
@@ -453,13 +453,13 @@ def test_cumsum():
     v = numpy.arange(3*4*5).reshape(3, 4, 5)
     this = x(v, name=nA)
     that = numpy.cumsum(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.cumsum(v), name=nR))
     that = numpy.cumsum(this, axis=0)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.cumsum(v, axis=0), name=nR))
     that = numpy.cumsum(this, axis=-1)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.cumsum(v, axis=-1), name=nR))
 
 
@@ -470,11 +470,11 @@ def test_transpose():
     v = numpy.arange(3*4*5).reshape(3, 4, 5)
     this = x(v, name=nA)
     that = numpy.transpose(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.transpose(v), name=nR))
     for axes in itertools.permutations(range(v.ndim)):
         that = numpy.transpose(this, axes=axes)
-        assert isinstance(that, attrops.Operand)
+        assert isinstance(that, oprattr.Operand)
         expected = x(numpy.transpose(v, axes=axes), name=nR)
         assert numpy.array_equal(that, expected)
 
@@ -488,11 +488,11 @@ def test_gradient():
     that = numpy.gradient(this)
     grad = numpy.gradient(v)
     for t, g in zip(that, grad):
-        assert isinstance(t, attrops.Operand)
+        assert isinstance(t, oprattr.Operand)
         assert numpy.array_equal(t, x(g, name=nR))
     for axis in range(v.ndim):
         that = numpy.gradient(this, axis=axis)
-        assert isinstance(that, attrops.Operand)
+        assert isinstance(that, oprattr.Operand)
         grad = numpy.gradient(v, axis=axis)
         assert numpy.array_equal(that, x(grad, name=nR))
 
@@ -504,11 +504,11 @@ def test_trapezoid():
     v = numpy.arange(3*4*5).reshape(3, 4, 5)
     this = x(v, name=nA)
     that = numpy.trapezoid(this)
-    assert isinstance(that, attrops.Operand)
+    assert isinstance(that, oprattr.Operand)
     assert numpy.array_equal(that, x(numpy.trapezoid(v), name=nR))
     for axis in range(v.ndim):
         that = numpy.trapezoid(this, axis=axis)
-        assert isinstance(that, attrops.Operand)
+        assert isinstance(that, oprattr.Operand)
         trap = numpy.trapezoid(v, axis=axis)
         assert numpy.array_equal(that, x(trap, name=nR))
 

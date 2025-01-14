@@ -1,1 +1,1 @@
-# attrops: Self-Consistent Operations on Object Attributes
+# oprattr: Self-Consistent Operations on Object Attributes
