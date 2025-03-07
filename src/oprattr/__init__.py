@@ -6,7 +6,7 @@ import numpy
 
 from . import mixins
 from . import operators
-from . import _types
+from . import abstract
 from ._operations import (
     unary,
     equality,
@@ -19,7 +19,7 @@ from ._operations import (
 T = typing.TypeVar('T')
 
 
-class Operand(_types.Object[T], mixins.Numpy):
+class Operand(abstract.Object[T], mixins.Numpy):
     """A concrete implementation of a real-valued object."""
 
     def __abs__(self):

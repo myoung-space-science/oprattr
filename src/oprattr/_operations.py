@@ -1,7 +1,7 @@
 import typing
 
 from . import operators
-from ._types import Object
+from .abstract import Object
 
 
 class MetadataError(TypeError):

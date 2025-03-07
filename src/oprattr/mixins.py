@@ -3,7 +3,7 @@ import typing
 
 import numpy
 
-from . import _types
+from . import abstract
 
 
 T = typing.TypeVar('T')
@@ -127,7 +127,7 @@ class Numpy:
         numpy.ndarray,
         numbers.Number,
         list,
-        _types.Object,
+        abstract.Object,
     }
 
     def __array_ufunc__(self, ufunc, method, *args, **kwargs):
@@ -162,7 +162,7 @@ class Numpy:
             return NotImplemented
         if out:
             kwargs['out'] = tuple(
-                x._data if isinstance(x, _types.Object)
+                x._data if isinstance(x, abstract.Object)
                 else x for x in out
             )
         if self._implements(ufunc):
@@ -207,7 +207,7 @@ class Numpy:
 
     _FUNCTION_TYPES = {
         numpy.ndarray,
-        _types.Object,
+        abstract.Object,
      } | set(numpy.ScalarType)
 
     def __array_function__(self, func, types, args, kwargs):
@@ -324,7 +324,7 @@ class Numpy:
           `arg` if `arg` is an instance of the base object class; otherwise, it
           will return the unmodified argument.
         """
-        if isinstance(arg, _types.Object):
+        if isinstance(arg, abstract.Object):
             return arg._data
         return arg
 
@@ -340,7 +340,7 @@ class Numpy:
         """
         return tuple(
             ti for ti in types
-            if not issubclass(ti, _types.Object)
+            if not issubclass(ti, abstract.Object)
         )
 
     @classmethod
