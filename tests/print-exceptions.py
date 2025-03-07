@@ -1,6 +1,6 @@
 """
 This script generates and echos exceptions related to operations on instances of
-the `Object` class. It is meant as a supplement to rigorous tests.
+the `Operand` class. It is meant as a supplement to rigorous tests.
 """
 
 import oprattr
