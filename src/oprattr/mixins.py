@@ -9,6 +9,79 @@ from . import _types
 T = typing.TypeVar('T')
 
 
+class Real:
+    """Mixin for adding basic real-valued operator support."""
+
+    def __abs__(self):
+        return self
+
+    def __pos__(self):
+        return self
+
+    def __neg__(self):
+        return self
+
+    def __eq__(self, other):
+        return False
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __lt__(self, other):
+        return False
+
+    def __le__(self, other):
+        return (self < other) and (self == other)
+
+    def __gt__(self, other):
+        return not (self <= other)
+
+    def __ge__(self, other):
+        return not (self < other)
+
+    def __add__(self, other):
+        return self
+
+    def __radd__(self, other):
+        return self
+
+    def __sub__(self, other):
+        return self
+
+    def __rsub__(self, other):
+        return self
+
+    def __mul__(self, other):
+        return self
+
+    def __rmul__(self, other):
+        return self
+
+    def __truediv__(self, other):
+        return self
+
+    def __rtruediv__(self, other):
+        return self
+
+    def __floordiv__(self, other):
+        return self
+
+    def __rfloordiv__(self, other):
+        return self
+
+    def __mod__(self, other):
+        return self
+
+    def __rmod__(self, other):
+        return self
+
+    def __pow__(self, other):
+        return self
+
+    def __rpow__(self, other):
+        return self
+
+
 UserFunction = typing.Callable[..., T]
 
 
