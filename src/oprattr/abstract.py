@@ -1,6 +1,4 @@
-import abc
 import numbers
-import typing
 
 import numerical
 import numpy.typing
@@ -8,7 +6,7 @@ import numpy.typing
 from . import typeface
 
 
-DataType = typing.TypeVar(
+DataType = typeface.TypeVar(
     'DataType',
     int,
     float,
@@ -23,10 +21,10 @@ DataType = typing.TypeVar(
 class Quantity(numerical.Quantity[DataType], typeface.Protocol):
     """Protocol for numerical objects with metadata."""
 
-    _meta: typing.Mapping[str, typing.Any]
+    _meta: typeface.Mapping[str, typeface.Any]
 
 
-class Object(numerical.Real, typing.Generic[DataType]):
+class Object(numerical.Real, typeface.Generic[DataType]):
     """A real-valued object with metadata attributes."""
 
     def __init__(

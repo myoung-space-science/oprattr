@@ -1,12 +1,12 @@
 import numbers
-import typing
 
 import numpy
 
 from . import abstract
+from . import typeface
 
 
-T = typing.TypeVar('T')
+T = typeface.TypeVar('T')
 
 
 class Real:
@@ -82,7 +82,7 @@ class Real:
         return self
 
 
-UserFunction = typing.Callable[..., T]
+UserFunction = typeface.Callable[..., T]
 
 
 class Numpy:
@@ -285,7 +285,7 @@ class Numpy:
         types = self._get_numpy_types(types)
         return array.__array_function__(func, types, args, kwargs)
 
-    def _get_numpy_array(self) -> typing.Optional[numpy.typing.NDArray]:
+    def _get_numpy_array(self) -> typeface.Optional[numpy.typing.NDArray]:
         """Convert the data interface to an array for `numpy` mixin methods.
         
         Notes
@@ -344,7 +344,7 @@ class Numpy:
         )
 
     @classmethod
-    def _implements(cls, operation: typing.Callable):
+    def _implements(cls, operation: typeface.Callable):
         """True if this class defines a custom implementation for `operation`.
         
         This is a helper methods that gracefully handles the case in which a
@@ -356,11 +356,11 @@ class Numpy:
             return False
         return result
 
-    _FUNCTIONS: typing.Dict[str, typing.Callable]=None
+    _FUNCTIONS: typeface.Dict[str, typeface.Callable]=None
     """Internal collection of custom `numpy` function implementations."""
 
     @classmethod
-    def implementation(cls, numpy_function: typing.Callable, /):
+    def implementation(cls, numpy_function: typeface.Callable, /):
         """Register a custom implementation of this `numpy` function.
 
         Parameters
@@ -424,7 +424,7 @@ class Numpy:
     @classmethod
     def implement(
         cls,
-        numpy_function: typing.Callable,
+        numpy_function: typeface.Callable,
         user_function: UserFunction,
         /,
     ) -> None:

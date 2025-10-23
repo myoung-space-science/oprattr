@@ -4,12 +4,13 @@ A namespace for operators used by this package's `Object` class.
 
 import builtins
 import operator
-import typing
+
+from . import typeface
 
 
 class Operator:
     """Base class for enhanced operators."""
-    def __init__(self, __f: typing.Callable, operation: str):
+    def __init__(self, __f: typeface.Callable, operation: str):
         self._f = __f
         self._operation = operation
 

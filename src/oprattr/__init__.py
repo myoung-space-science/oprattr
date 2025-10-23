@@ -1,12 +1,12 @@
 import functools
 import numbers
-import typing
 
 import numpy
 
+from . import abstract
 from . import mixins
 from . import operators
-from . import abstract
+from . import typeface
 from ._operations import (
     unary,
     equality,
@@ -16,7 +16,7 @@ from ._operations import (
 )
 
 
-T = typing.TypeVar('T')
+T = typeface.TypeVar('T')
 
 
 class Operand(abstract.Object[T], mixins.Numpy):
@@ -155,7 +155,7 @@ def gradient(x: Operand[T], *args, **kwargs):
     return type(x)(data, **meta)
 
 
-def wrapnumpy(f: typing.Callable):
+def wrapnumpy(f: typeface.Callable):
     """Implement a numpy function for objects with metadata."""
     @functools.wraps(f)
     def method(x: Operand[T], **kwargs):
