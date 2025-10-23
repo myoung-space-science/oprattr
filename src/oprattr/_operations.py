@@ -1,7 +1,7 @@
 import typing
 
 from . import operators
-from .abstract import Object
+from .abstract import Quantity
 
 
 class MetadataError(TypeError):
@@ -50,9 +50,9 @@ def _build_error_message(
         if len(types) == 2:
             a, b = types
             endstr = "because {} has metadata"
-            if issubclass(a, Object):
+            if issubclass(a, Quantity):
                 return f"{errmsg} between {a} and {b} {endstr.format(str(a))}"
-            if issubclass(b, Object):
+            if issubclass(b, Quantity):
                 return f"{errmsg} between {a} and {b} {endstr.format(str(b))}"
     if errstr == 'type':
         if key is None:
@@ -71,7 +71,7 @@ def _build_error_message(
 
 def unary(f: operators.Operator, a):
     """Compute the unary operation f(a)."""
-    if isinstance(a, Object):
+    if isinstance(a, Quantity):
         meta = {}
         for key, value in a._meta.items():
             try:
@@ -86,15 +86,15 @@ def unary(f: operators.Operator, a):
 
 def equality(f: operators.Operator, a, b):
     """Compute the equality operation f(a, b)."""
-    if isinstance(a, Object) and isinstance(b, Object):
+    if isinstance(a, Quantity) and isinstance(b, Quantity):
         if a._meta != b._meta:
             return f is operators.ne
         return f(a._data, b._data)
-    if isinstance(a, Object):
+    if isinstance(a, Quantity):
         if not a._meta:
             return f(a._data, b)
         return f is operators.ne
-    if isinstance(b, Object):
+    if isinstance(b, Quantity):
         if not b._meta:
             return f(a, b._data)
         return f is operators.ne
@@ -103,15 +103,15 @@ def equality(f: operators.Operator, a, b):
 
 def ordering(f: operators.Operator, a, b):
     """Compute the ordering operation f(a, b)."""
-    if isinstance(a, Object) and isinstance(b, Object):
+    if isinstance(a, Quantity) and isinstance(b, Quantity):
         if a._meta == b._meta:
             return f(a._data, b._data)
         raise MetadataError(f, a, b, error='unequal') from None
-    if isinstance(a, Object):
+    if isinstance(a, Quantity):
         if not a._meta:
             return f(a._data, b)
         raise MetadataError(f, a, b, error='non-empty') from None
-    if isinstance(b, Object):
+    if isinstance(b, Quantity):
         if not b._meta:
             return f(a, b._data)
         raise MetadataError(f, a, b, error='non-empty') from None
@@ -120,15 +120,15 @@ def ordering(f: operators.Operator, a, b):
 
 def additive(f: operators.Operator, a, b):
     """Compute the additive operation f(a, b)."""
-    if isinstance(a, Object) and isinstance(b, Object):
+    if isinstance(a, Quantity) and isinstance(b, Quantity):
         if a._meta == b._meta:
             return type(a)(f(a._data, b._data), **a._meta)
         raise MetadataError(f, a, b, error='unequal') from None
-    if isinstance(a, Object):
+    if isinstance(a, Quantity):
         if not a._meta:
             return type(a)(f(a._data, b))
         raise MetadataError(f, a, b, error='non-empty') from None
-    if isinstance(b, Object):
+    if isinstance(b, Quantity):
         if not b._meta:
             return type(b)(f(a, b._data))
         raise MetadataError(f, a, b, error='non-empty') from None
@@ -137,7 +137,7 @@ def additive(f: operators.Operator, a, b):
 
 def multiplicative(f: operators.Operator, a, b):
     """Compute the multiplicative operation f(a, b)."""
-    if isinstance(a, Object) and isinstance(b, Object):
+    if isinstance(a, Quantity) and isinstance(b, Quantity):
         keys = set(a._meta) & set(b._meta)
         meta = {}
         for key in keys:
@@ -154,7 +154,7 @@ def multiplicative(f: operators.Operator, a, b):
             if key not in keys:
                 meta[key] = value
         return type(a)(f(a._data, b._data), **meta)
-    if isinstance(a, Object):
+    if isinstance(a, Quantity):
         meta = {}
         for key, value in a._meta.items():
             try:
@@ -164,7 +164,7 @@ def multiplicative(f: operators.Operator, a, b):
             else:
                 meta[key] = v
         return type(a)(f(a._data, b), **meta)
-    if isinstance(b, Object):
+    if isinstance(b, Quantity):
         meta = {}
         for key, value in b._meta.items():
             try:
