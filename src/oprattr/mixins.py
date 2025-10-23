@@ -127,7 +127,7 @@ class Numpy:
         numpy.ndarray,
         numbers.Number,
         list,
-        abstract.Object,
+        abstract.Quantity,
     }
 
     def __array_ufunc__(self, ufunc, method, *args, **kwargs):
@@ -162,7 +162,7 @@ class Numpy:
             return NotImplemented
         if out:
             kwargs['out'] = tuple(
-                x._data if isinstance(x, abstract.Object)
+                x._data if isinstance(x, abstract.Quantity)
                 else x for x in out
             )
         if self._implements(ufunc):
@@ -324,7 +324,7 @@ class Numpy:
           `arg` if `arg` is an instance of the base object class; otherwise, it
           will return the unmodified argument.
         """
-        if isinstance(arg, abstract.Object):
+        if isinstance(arg, abstract.Quantity):
             return arg._data
         return arg
 
