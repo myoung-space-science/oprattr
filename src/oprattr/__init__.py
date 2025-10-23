@@ -1,3 +1,4 @@
+import collections.abc
 import functools
 import numbers
 
@@ -155,7 +156,7 @@ def gradient(x: Operand[T], *args, **kwargs):
     return type(x)(data, **meta)
 
 
-def wrapnumpy(f: typeface.Callable):
+def wrapnumpy(f: collections.abc.Callable):
     """Implement a numpy function for objects with metadata."""
     @functools.wraps(f)
     def method(x: Operand[T], **kwargs):

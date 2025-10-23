@@ -1,5 +1,4 @@
 from . import operators
-from . import typeface
 from .abstract import Quantity
 
 
@@ -10,8 +9,8 @@ class MetadataError(TypeError):
         self,
         f: operators.Operator,
         *args,
-        error: typeface.Optional[str]=None,
-        key: typeface.Optional[str]=None,
+        error: str | None = None,
+        key: str | None = None,
     ) -> None:
         super().__init__(*args)
         self._f = f
@@ -32,8 +31,8 @@ class MetadataError(TypeError):
 def _build_error_message(
     f: operators.Operator,
     *types: type,
-    error: typeface.Optional[str]=None,
-    key: typeface.Optional[str]=None,
+    error: str | None = None,
+    key: str | None = None,
 ) -> str:
     """Helper for `_raise_metadata_exception`.
     

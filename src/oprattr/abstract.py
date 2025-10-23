@@ -1,3 +1,4 @@
+import collections.abc
 import numbers
 
 import numerical
@@ -21,7 +22,7 @@ DataType = typeface.TypeVar(
 class Quantity(numerical.Quantity[DataType], typeface.Protocol):
     """Protocol for numerical objects with metadata."""
 
-    _meta: typeface.Mapping[str, typeface.Any]
+    _meta: collections.abc.Mapping[str, typeface.Any]
 
 
 class Object(numerical.Real, typeface.Generic[DataType]):
