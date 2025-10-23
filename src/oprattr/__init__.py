@@ -114,7 +114,7 @@ class Operand(abstract.Object[T], mixins.Numpy):
 
     def __rpow__(self, other):
         """Called for other ** self."""
-        return super().__rpow__(other)
+        return NotImplemented
 
     def __array__(self, *args, **kwargs):
         """Called for numpy.array(self)."""
