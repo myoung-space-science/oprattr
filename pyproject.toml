@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "numerical",
     "numpy>=2.2.1",
     "scipy>=1.15.0",
 ]
@@ -21,3 +22,6 @@ dev = [
     "ipython>=8.31.0",
     "pytest>=8.3.4",
 ]
+
+[tool.uv.sources]
+numerical = { git = "https://github.com/myoung-space-science/numerical", rev = "v0.2.0" }

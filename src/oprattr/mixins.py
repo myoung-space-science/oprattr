@@ -1,12 +1,13 @@
+import collections.abc
 import numbers
-import typing
 
 import numpy
 
 from . import abstract
+from . import typeface
 
 
-T = typing.TypeVar('T')
+T = typeface.TypeVar('T')
 
 
 class Real:
@@ -82,7 +83,7 @@ class Real:
         return self
 
 
-UserFunction = typing.Callable[..., T]
+UserFunction = collections.abc.Callable[..., T]
 
 
 class Numpy:
@@ -127,7 +128,7 @@ class Numpy:
         numpy.ndarray,
         numbers.Number,
         list,
-        abstract.Object,
+        abstract.Quantity,
     }
 
     def __array_ufunc__(self, ufunc, method, *args, **kwargs):
@@ -162,7 +163,7 @@ class Numpy:
             return NotImplemented
         if out:
             kwargs['out'] = tuple(
-                x._data if isinstance(x, abstract.Object)
+                x._data if isinstance(x, abstract.Quantity)
                 else x for x in out
             )
         if self._implements(ufunc):
@@ -285,7 +286,7 @@ class Numpy:
         types = self._get_numpy_types(types)
         return array.__array_function__(func, types, args, kwargs)
 
-    def _get_numpy_array(self) -> typing.Optional[numpy.typing.NDArray]:
+    def _get_numpy_array(self) -> numpy.typing.NDArray | None:
         """Convert the data interface to an array for `numpy` mixin methods.
         
         Notes
@@ -324,7 +325,7 @@ class Numpy:
           `arg` if `arg` is an instance of the base object class; otherwise, it
           will return the unmodified argument.
         """
-        if isinstance(arg, abstract.Object):
+        if isinstance(arg, abstract.Quantity):
             return arg._data
         return arg
 
@@ -344,7 +345,7 @@ class Numpy:
         )
 
     @classmethod
-    def _implements(cls, operation: typing.Callable):
+    def _implements(cls, operation: collections.abc.Callable):
         """True if this class defines a custom implementation for `operation`.
         
         This is a helper methods that gracefully handles the case in which a
@@ -356,11 +357,11 @@ class Numpy:
             return False
         return result
 
-    _FUNCTIONS: typing.Dict[str, typing.Callable]=None
+    _FUNCTIONS: dict[str, collections.abc.Callable]=None
     """Internal collection of custom `numpy` function implementations."""
 
     @classmethod
-    def implementation(cls, numpy_function: typing.Callable, /):
+    def implementation(cls, numpy_function: collections.abc.Callable, /):
         """Register a custom implementation of this `numpy` function.
 
         Parameters
@@ -424,7 +425,7 @@ class Numpy:
     @classmethod
     def implement(
         cls,
-        numpy_function: typing.Callable,
+        numpy_function: collections.abc.Callable,
         user_function: UserFunction,
         /,
     ) -> None:

@@ -1,108 +1,13 @@
-import abc
+import collections.abc
 import numbers
-import typing
 
+import numerical
 import numpy.typing
 
-
-@typing.runtime_checkable
-class Real(typing.Protocol):
-    """Abstract protocol for real-valued objects."""
-
-    @abc.abstractmethod
-    def __abs__(self):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __pos__(self):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __neg__(self):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __eq__(self, other):
-        return False
-
-    @abc.abstractmethod
-    def __ne__(self, other):
-        return True
-
-    @abc.abstractmethod
-    def __le__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __lt__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __ge__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __gt__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __add__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __radd__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __sub__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __rsub__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __mul__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __rmul__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __truediv__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __rtruediv__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __floordiv__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __rfloordiv__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __mod__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __rmod__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __pow__(self, other):
-        return NotImplemented
-
-    @abc.abstractmethod
-    def __rpow__(self, other):
-        return NotImplemented
+from . import typeface
 
 
-DataType = typing.TypeVar(
+DataType = typeface.TypeVar(
     'DataType',
     int,
     float,
@@ -113,7 +18,14 @@ DataType = typing.TypeVar(
 )
 
 
-class Object(Real, typing.Generic[DataType]):
+@typeface.runtime_checkable
+class Quantity(numerical.Quantity[DataType], typeface.Protocol):
+    """Protocol for numerical objects with metadata."""
+
+    _meta: collections.abc.Mapping[str, typeface.Any]
+
+
+class Object(numerical.Real, typeface.Generic[DataType]):
     """A real-valued object with metadata attributes."""
 
     def __init__(
@@ -121,7 +33,7 @@ class Object(Real, typing.Generic[DataType]):
         __data: DataType,
         **metadata,
     ) -> None:
-        if not isinstance(__data, Real):
+        if not isinstance(__data, numerical.Real):
             raise TypeError("Data input to Object must be real-valued")
         self._data = __data
         self._meta = metadata

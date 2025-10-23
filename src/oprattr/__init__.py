@@ -1,12 +1,13 @@
+import collections.abc
 import functools
 import numbers
-import typing
 
 import numpy
 
+from . import abstract
 from . import mixins
 from . import operators
-from . import abstract
+from . import typeface
 from ._operations import (
     unary,
     equality,
@@ -16,7 +17,7 @@ from ._operations import (
 )
 
 
-T = typing.TypeVar('T')
+T = typeface.TypeVar('T')
 
 
 class Operand(abstract.Object[T], mixins.Numpy):
@@ -114,7 +115,7 @@ class Operand(abstract.Object[T], mixins.Numpy):
 
     def __rpow__(self, other):
         """Called for other ** self."""
-        return super().__rpow__(other)
+        return NotImplemented
 
     def __array__(self, *args, **kwargs):
         """Called for numpy.array(self)."""
@@ -155,7 +156,7 @@ def gradient(x: Operand[T], *args, **kwargs):
     return type(x)(data, **meta)
 
 
-def wrapnumpy(f: typing.Callable):
+def wrapnumpy(f: collections.abc.Callable):
     """Implement a numpy function for objects with metadata."""
     @functools.wraps(f)
     def method(x: Operand[T], **kwargs):
