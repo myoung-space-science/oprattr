@@ -1,4 +1,5 @@
-from . import operators
+from numerical import operators
+
 from .abstract import Quantity
 
 
