@@ -2,11 +2,11 @@ import collections.abc
 import functools
 import numbers
 
+from numerical import operators
 import numpy
 
 from . import abstract
 from . import mixins
-from . import operators
 from . import typeface
 from ._operations import (
     unary,
