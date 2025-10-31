@@ -85,19 +85,29 @@ def unary(f: operators.Operator, a):
 
 def equality(f: operators.Operator, a, b):
     """Compute the equality operation f(a, b)."""
+    x = a._data if isinstance(a, Quantity) else a
+    y = b._data if isinstance(b, Quantity) else b
+    fxy = f(x, y)
+    try:
+        iter(fxy)
+    except TypeError:
+        r = bool(fxy)
+    else:
+        r = all(fxy)
+    isne = f(1, 2)
     if isinstance(a, Quantity) and isinstance(b, Quantity):
         if a._meta != b._meta:
-            return f is operators.ne
-        return f(a._data, b._data)
+            return isne
+        return r
     if isinstance(a, Quantity):
         if not a._meta:
-            return f(a._data, b)
-        return f is operators.ne
+            return r
+        return isne
     if isinstance(b, Quantity):
         if not b._meta:
-            return f(a, b._data)
-        return f is operators.ne
-    return f(a, b)
+            return r
+        return isne
+    return r
 
 
 def ordering(f: operators.Operator, a, b):
