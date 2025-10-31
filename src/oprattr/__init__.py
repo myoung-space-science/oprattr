@@ -121,6 +121,15 @@ class Operand(abstract.Object[T], mixins.Numpy):
         """Called for numpy.array(self)."""
         return numpy.array(self._data, *args, **kwargs)
 
+    def _apply_ufunc(self, ufunc, method, *args, **kwargs):
+        if ufunc in (numpy.equal, numpy.not_equal):
+            # NOTE: We are probably here because the left operand is a
+            # `numpy.ndarray`, which would otherwise take control and return the
+            # pure `numpy` result.
+            f = getattr(ufunc, method)
+            return equality(f, *args)
+        return super()._apply_ufunc(ufunc, method, *args, **kwargs)
+
 
 @Operand.implementation(numpy.array_equal)
 def array_equal(
