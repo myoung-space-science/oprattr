@@ -94,18 +94,19 @@ def equality(f: operators.Operator, a, b):
         r = bool(fxy)
     else:
         r = all(fxy)
+    isne = f(1, 2)
     if isinstance(a, Quantity) and isinstance(b, Quantity):
         if a._meta != b._meta:
-            return f is operators.ne
+            return isne
         return r
     if isinstance(a, Quantity):
         if not a._meta:
             return r
-        return f is operators.ne
+        return isne
     if isinstance(b, Quantity):
         if not b._meta:
             return r
-        return f is operators.ne
+        return isne
     return r
 
 
