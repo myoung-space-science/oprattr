@@ -196,10 +196,20 @@ def test_equality():
     assert x(1) != x(-1)
     assert x(1) == 1
     assert x(1) != -1
-    assert x(1, name=Symbol('A')) == x(1, name=Symbol('A'))
-    assert x(1, name=Symbol('A')) != x(1, name=Symbol('B'))
-    assert x(1, name=Symbol('A')) != 1
-    assert 1 != x(1, name=Symbol('A'))
+    sA = Symbol('A')
+    sB = Symbol('B')
+    assert x(1, name=sA) == x(1, name=sA)
+    assert x(1, name=sA) != x(1, name=sB)
+    assert x(1, name=sA) != 1
+    assert 1 != x(1, name=sA)
+    array = numpy.array([-1, +1])
+    assert x(array) == x(array)
+    assert x(array, name=sA) == x(array, name=sA)
+    assert x(array, name=sA) != x(array, name=sB)
+    assert x(array, name=sA) != array
+    assert x(array) == array
+    assert array == x(array)
+    assert array != x(array, name=sA)
 
 
 def test_ordering():
