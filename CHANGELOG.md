@@ -1,5 +1,8 @@
 ## NEXT
 
+- Replace local `operators` module with equivalent module from `numerical` package
+- Redefine equality to always return a single boolean value
+
 ## v0.3.0
 
 - Incorporate `numerical` package
