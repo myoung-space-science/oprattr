@@ -1,6 +1,9 @@
 from numerical import operators
 
-from .abstract import Quantity
+from .abstract import (
+    Quantity,
+    Object,
+)
 
 
 class MetadataError(TypeError):
@@ -49,9 +52,9 @@ def _build_error_message(
         if len(types) == 2:
             a, b = types
             endstr = "because {} has metadata"
-            if issubclass(a, Quantity):
+            if issubclass(a, Object):
                 return f"{errmsg} between {a} and {b} {endstr.format(str(a))}"
-            if issubclass(b, Quantity):
+            if issubclass(b, Object):
                 return f"{errmsg} between {a} and {b} {endstr.format(str(b))}"
     if errstr == 'type':
         if key is None:
