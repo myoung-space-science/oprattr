@@ -2,6 +2,7 @@
 
 - Add `methods` module
 - Add `__init__.pyi` type file
+- Update metadata error types
 
 ## v0.5.0
 
