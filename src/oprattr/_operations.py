@@ -6,40 +6,22 @@ from .abstract import (
 )
 
 
-class MetadataError(TypeError):
+class MetadataTypeError(TypeError):
     """A metadata-related TypeError occurred."""
 
-    def __init__(
-        self,
-        f: operators.Operator,
-        *args,
-        error: str | None = None,
-        key: str | None = None,
-    ) -> None:
-        super().__init__(*args)
-        self._f = f
-        self._error = error
-        self._key = key
 
-    def __str__(self):
-        """Called when handling the exception."""
-        types = [type(arg) for arg in self.args]
-        return _build_error_message(
-            self._f,
-            *types,
-            error=self._error,
-            key=self._key,
-        )
+class MetadataValueError(ValueError):
+    """A metadata-related ValueError occurred."""
 
 
 def _build_error_message(
     f: operators.Operator,
-    *types: type,
+    *args,
     error: str | None = None,
     key: str | None = None,
 ) -> str:
-    """Helper for `_raise_metadata_exception`.
-    
+    """Helper for metadata error messages.
+
     This function should avoid raising an exception if at all possible, and
     instead return the default error message, since it is already being called
     as the result of an error elsewhere.
@@ -48,6 +30,7 @@ def _build_error_message(
     errstr = error.lower() if isinstance(error, str) else ''
     if errstr == 'unequal':
         return f"{errmsg} between objects with unequal metadata"
+    types = [type(arg) for arg in args]
     if errstr in {'non-empty', 'nonempty'}:
         if len(types) == 2:
             a, b = types
@@ -79,7 +62,8 @@ def unary(f: operators.Operator, a):
             try:
                 v = f(value)
             except TypeError as exc:
-                raise MetadataError(f, a, error='type', key=key) from exc
+                errmsg = _build_error_message(f, a, error='type', key=key)
+                raise MetadataTypeError(errmsg) from exc
             else:
                 meta[key] = v
         return type(a)(f(a._data), **meta)
@@ -118,15 +102,17 @@ def ordering(f: operators.Operator, a, b):
     if isinstance(a, Quantity) and isinstance(b, Quantity):
         if a._meta == b._meta:
             return f(a._data, b._data)
-        raise MetadataError(f, a, b, error='unequal') from None
+        errmsg = _build_error_message(f, a, b, error='unequal')
+        raise MetadataValueError(errmsg) from None
+    errmsg = _build_error_message(f, a, b, error='non-empty')
     if isinstance(a, Quantity):
         if not a._meta:
             return f(a._data, b)
-        raise MetadataError(f, a, b, error='non-empty') from None
+        raise MetadataTypeError(errmsg) from None
     if isinstance(b, Quantity):
         if not b._meta:
             return f(a, b._data)
-        raise MetadataError(f, a, b, error='non-empty') from None
+        raise MetadataTypeError(errmsg) from None
     return f(a, b)
 
 
@@ -135,15 +121,17 @@ def additive(f: operators.Operator, a, b):
     if isinstance(a, Quantity) and isinstance(b, Quantity):
         if a._meta == b._meta:
             return type(a)(f(a._data, b._data), **a._meta)
-        raise MetadataError(f, a, b, error='unequal') from None
+        errmsg = _build_error_message(f, a, b, error='unequal')
+        raise MetadataValueError(errmsg) from None
+    errmsg = _build_error_message(f, a, b, error='non-empty')
     if isinstance(a, Quantity):
         if not a._meta:
             return type(a)(f(a._data, b))
-        raise MetadataError(f, a, b, error='non-empty') from None
+        raise MetadataTypeError(errmsg) from None
     if isinstance(b, Quantity):
         if not b._meta:
             return type(b)(f(a, b._data))
-        raise MetadataError(f, a, b, error='non-empty') from None
+        raise MetadataTypeError(errmsg) from None
     return f(a, b)
 
 
@@ -156,7 +144,8 @@ def multiplicative(f: operators.Operator, a, b):
             try:
                 v = f(a._meta[key], b._meta[key])
             except TypeError as exc:
-                raise MetadataError(f, a, b, error='type', key=key) from exc
+                errmsg = _build_error_message(f, a, b, error='type', key=key)
+                raise MetadataTypeError(errmsg) from exc
             else:
                 meta[key] = v
         for key, value in a._meta.items():
@@ -172,7 +161,8 @@ def multiplicative(f: operators.Operator, a, b):
             try:
                 v = f(value, b)
             except TypeError as exc:
-                raise MetadataError(f, a, b, error='type', key=key) from exc
+                errmsg = _build_error_message(f, a, b, error='type', key=key)
+                raise MetadataTypeError(errmsg) from exc
             else:
                 meta[key] = v
         return type(a)(f(a._data, b), **meta)
@@ -182,7 +172,8 @@ def multiplicative(f: operators.Operator, a, b):
             try:
                 v = f(a, value)
             except TypeError as exc:
-                raise MetadataError(f, a, b, error='type', key=key) from exc
+                errmsg = _build_error_message(f, a, b, error='type', key=key)
+                raise MetadataTypeError(errmsg) from exc
             else:
                 meta[key] = v
         return type(b)(f(a, b._data), **meta)
