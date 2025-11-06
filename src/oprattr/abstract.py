@@ -38,8 +38,8 @@ class Object(numerical.Real, typeface.Generic[DataType]):
         self._data = __data
         self._meta = metadata
 
-    def __repr__(self):
-        """Called for repr(self)."""
+    def __str__(self):
+        """Called for str(self)."""
         try:
             datastr = numpy.array2string(
                 self._data,
@@ -51,6 +51,10 @@ class Object(numerical.Real, typeface.Generic[DataType]):
             )
         except Exception:
             datastr = str(self._data)
-        metastr = "metadata={" + ", ".join(f"{k!r}" for k in self._meta) + "}"
-        return f"{self.__class__.__qualname__}({datastr}, {metastr})"
+        metastr = ", ".join(f"{k}={str(v)!r}" for k, v in self._meta.items())
+        return f"{datastr}, {metastr}"
+
+    def __repr__(self):
+        """Called for repr(self)."""
+        return f"{self.__class__.__qualname__}({self})"
 
