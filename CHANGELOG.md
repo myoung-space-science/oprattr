@@ -1,5 +1,8 @@
 ## NEXT
 
+- Fix `MetadataError` bug
+- Improve string representations of `Operand` instances
+
 ## v0.4.0
 
 - Replace local `operators` module with equivalent module from `numerical` package
