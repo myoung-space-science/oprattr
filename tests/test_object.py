@@ -220,24 +220,26 @@ def test_ordering():
     assert x(1) > x(0)
     assert x(1) >= x(0)
     assert x(1) >= x(1)
-    assert x(1, name=Symbol('A')) < x(2, name=Symbol('A'))
-    assert x(1, name=Symbol('A')) <= x(2, name=Symbol('A'))
-    assert x(1, name=Symbol('A')) <= x(1, name=Symbol('A'))
-    assert x(1, name=Symbol('A')) > x(0, name=Symbol('A'))
-    assert x(1, name=Symbol('A')) >= x(0, name=Symbol('A'))
-    assert x(1, name=Symbol('A')) >= x(1, name=Symbol('A'))
-    with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) < x(2, name=Symbol('B'))
-    with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) <= x(2, name=Symbol('B'))
-    with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) <= x(1, name=Symbol('B'))
-    with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) > x(0, name=Symbol('B'))
-    with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) >= x(0, name=Symbol('B'))
-    with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) >= x(1, name=Symbol('B'))
+    nA = Symbol('A')
+    nB = Symbol('B')
+    assert x(1, name=nA) < x(2, name=nA)
+    assert x(1, name=nA) <= x(2, name=nA)
+    assert x(1, name=nA) <= x(1, name=nA)
+    assert x(1, name=nA) > x(0, name=nA)
+    assert x(1, name=nA) >= x(0, name=nA)
+    assert x(1, name=nA) >= x(1, name=nA)
+    with pytest.raises(ValueError):
+         x(1, name=nA) < x(2, name=nB)
+    with pytest.raises(ValueError):
+         x(1, name=nA) <= x(2, name=nB)
+    with pytest.raises(ValueError):
+         x(1, name=nA) <= x(1, name=nB)
+    with pytest.raises(ValueError):
+         x(1, name=nA) > x(0, name=nB)
+    with pytest.raises(ValueError):
+         x(1, name=nA) >= x(0, name=nB)
+    with pytest.raises(ValueError):
+         x(1, name=nA) >= x(1, name=nB)
     assert x(1) < +2
     assert x(1) <= +2
     assert x(1) <= +1
@@ -245,17 +247,17 @@ def test_ordering():
     assert x(1) >= 0
     assert x(1) >= +1
     with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) < +2
+         x(1, name=nA) < +2
     with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) <= +2
+         x(1, name=nA) <= +2
     with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) <= +1
+         x(1, name=nA) <= +1
     with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) > 0
+         x(1, name=nA) > 0
     with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) >= 0
+         x(1, name=nA) >= 0
     with pytest.raises(TypeError):
-         x(1, name=Symbol('A')) >= +1
+         x(1, name=nA) >= +1
 
 
 def test_unary():
@@ -263,9 +265,10 @@ def test_unary():
     assert abs(x(-1)) == x(1)
     assert +x(-1) == x(-1)
     assert -x(1) == x(-1)
-    assert abs(x(-1, name=Symbol('A'))) == x(1, name=Symbol('abs(A)'))
-    assert +x(1, name=Symbol('A')) == x(+1, name=Symbol('+A'))
-    assert -x(1, name=Symbol('A')) == x(-1, name=Symbol('-A'))
+    nA = Symbol('A')
+    assert abs(x(-1, name=nA)) == x(1, name=Symbol('abs(A)'))
+    assert +x(1, name=nA) == x(+1, name=Symbol('+A'))
+    assert -x(1, name=nA) == x(-1, name=Symbol('-A'))
     with pytest.raises(TypeError):
         abs(x(-1, name='A'))
     with pytest.raises(TypeError):
@@ -280,11 +283,11 @@ def test_additive():
     nA = Symbol('A')
     nB = Symbol('B')
     assert x(1, name=nA) + x(2, name=nA) == x(3, name=nA)
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         x(1, name=nA) + x(2, name=nB)
     assert x(1) - x(2) == x(-1)
     assert x(1, name=nA) - x(2, name=nA) == x(-1, name=nA)
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         x(1, name=nA) - x(2, name=nB)
     assert x(1) + 2 == x(3)
     with pytest.raises(TypeError):
