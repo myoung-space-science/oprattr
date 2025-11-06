@@ -1,5 +1,8 @@
 ## NEXT
 
+- Add `methods` module
+- Add `__init__.pyi` type file
+
 ## v0.5.0
 
 - Fix `MetadataError` bug
