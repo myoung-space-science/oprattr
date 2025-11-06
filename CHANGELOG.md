@@ -1,5 +1,7 @@
 ## NEXT
 
+## v0.6.0
+
 - Add `methods` module
 - Add `__init__.pyi` type file
 - Update metadata error types
