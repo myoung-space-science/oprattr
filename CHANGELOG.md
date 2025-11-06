@@ -1,5 +1,7 @@
 ## NEXT
 
+## v0.5.0
+
 - Fix `MetadataError` bug
 - Improve string representations of `Operand` instances
 
