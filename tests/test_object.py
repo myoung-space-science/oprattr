@@ -157,11 +157,6 @@ def symbol_gradient(x: Symbol, **kwargs):
     return f"numpy.gradient({x})"
 
 
-@Symbol.implementation(numpy.trapezoid)
-def symbol_trapezoid(x: Symbol, **kwargs):
-    return f"numpy.trapezoid({x})"
-
-
 def symbolic_binary(a, op, b):
     if isinstance(a, (Symbol, str)) and isinstance(b, (Symbol, str)):
         return f"{a} {op} {b}"
@@ -502,26 +497,29 @@ def test_gradient():
     grad = numpy.gradient(v)
     for t, g in zip(that, grad):
         assert isinstance(t, oprattr.Operand)
-        assert numpy.array_equal(t, x(g, name=nR))
+        assert numpy.array_equal(t, g)
+        assert t._meta['name'] == nR
     for axis in range(v.ndim):
         that = numpy.gradient(this, axis=axis)
         assert isinstance(that, oprattr.Operand)
         grad = numpy.gradient(v, axis=axis)
-        assert numpy.array_equal(that, x(grad, name=nR))
+        assert numpy.array_equal(that, grad)
+        assert t._meta['name'] == nR
 
 
 def test_trapezoid():
-    """Test `numpy.trapezoid`."""
+    """Test `numpy.trapezoid`, which `Symbol` does not implement."""
     nA = Symbol('A')
-    nR = Symbol('numpy.trapezoid(A)')
     v = numpy.arange(3*4*5).reshape(3, 4, 5)
     this = x(v, name=nA)
     that = numpy.trapezoid(this)
     assert isinstance(that, oprattr.Operand)
-    assert numpy.array_equal(that, x(numpy.trapezoid(v), name=nR))
+    assert numpy.array_equal(that, numpy.trapezoid(v))
+    assert that._meta['name'] == nA
     for axis in range(v.ndim):
         that = numpy.trapezoid(this, axis=axis)
         assert isinstance(that, oprattr.Operand)
         trap = numpy.trapezoid(v, axis=axis)
-        assert numpy.array_equal(that, x(trap, name=nR))
+        assert numpy.array_equal(that, trap)
+        assert that._meta['name'] == nA
 
