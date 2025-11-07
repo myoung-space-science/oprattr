@@ -4,14 +4,10 @@ from ._abstract import (
     Quantity,
     Object,
 )
-
-
-class MetadataTypeError(TypeError):
-    """A metadata-related TypeError occurred."""
-
-
-class MetadataValueError(ValueError):
-    """A metadata-related ValueError occurred."""
+from ._exceptions import (
+    MetadataTypeError,
+    MetadataValueError,
+)
 
 
 def _build_error_message(
