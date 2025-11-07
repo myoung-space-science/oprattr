@@ -3,17 +3,28 @@ import functools
 
 import numpy
 
-from . import _abstract
+from ._abstract import (
+    Quantity,
+    Object,
+)
 from . import methods
 from . import mixins
 from . import typeface
-from ._operations import equality
+from ._operations import (
+    unary,
+    equality,
+    ordering,
+    additive,
+    multiplicative,
+    MetadataTypeError,
+    MetadataValueError,
+)
 
 
 T = typeface.TypeVar('T')
 
 
-class Operand(_abstract.Object[T], mixins.Numpy):
+class Operand(Object[T], mixins.Numpy):
     """A concrete implementation of a real-valued object."""
 
     __abs__ = methods.__abs__
@@ -137,3 +148,20 @@ for f in _OPERAND_UFUNCS + _OPERAND_FUNCTIONS:
     Operand.implement(f, wrapnumpy(f))
 
 
+__all__ = [
+    # Modules
+    methods,
+    mixins,
+    # Object classes
+    Quantity,
+    Object,
+    # Functions
+    unary,
+    equality,
+    ordering,
+    additive,
+    multiplicative,
+    # Error classes
+    MetadataTypeError,
+    MetadataValueError,
+]
