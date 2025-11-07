@@ -4,10 +4,10 @@ import numbers
 import numerical
 import numpy.typing
 
-from . import typeface
+from . import _typeface
 
 
-DataType = typeface.TypeVar(
+DataType = _typeface.TypeVar(
     'DataType',
     int,
     float,
@@ -18,14 +18,14 @@ DataType = typeface.TypeVar(
 )
 
 
-@typeface.runtime_checkable
-class Quantity(numerical.Quantity[DataType], typeface.Protocol):
+@_typeface.runtime_checkable
+class Quantity(numerical.Quantity[DataType], _typeface.Protocol):
     """Protocol for numerical objects with metadata."""
 
-    _meta: collections.abc.Mapping[str, typeface.Any]
+    _meta: collections.abc.Mapping[str, _typeface.Any]
 
 
-class Object(numerical.Real, typeface.Generic[DataType]):
+class Object(numerical.Real, _typeface.Generic[DataType]):
     """A real-valued object with metadata attributes."""
 
     def __init__(

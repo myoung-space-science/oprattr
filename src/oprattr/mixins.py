@@ -3,12 +3,11 @@ import numbers
 
 import numpy
 
-from . import abstract
-from . import typeface
+from . import _abstract
+from . import _typeface
 
 
-T = typeface.TypeVar('T')
-
+T = _typeface.TypeVar('T')
 
 class Real:
     """Mixin for adding basic real-valued operator support."""
@@ -85,7 +84,6 @@ class Real:
 
 UserFunction = collections.abc.Callable[..., T]
 
-
 class Numpy:
     """Mixin for adding support for `numpy` functions to numeric objects.
     
@@ -128,7 +126,7 @@ class Numpy:
         numpy.ndarray,
         numbers.Number,
         list,
-        abstract.Quantity,
+        _abstract.Quantity,
     }
 
     def __array_ufunc__(self, ufunc, method, *args, **kwargs):
@@ -163,7 +161,7 @@ class Numpy:
             return NotImplemented
         if out:
             kwargs['out'] = tuple(
-                x._data if isinstance(x, abstract.Quantity)
+                x._data if isinstance(x, _abstract.Quantity)
                 else x for x in out
             )
         if self._implements(ufunc):
@@ -208,7 +206,7 @@ class Numpy:
 
     _FUNCTION_TYPES = {
         numpy.ndarray,
-        abstract.Object,
+        _abstract.Object,
      } | set(numpy.ScalarType)
 
     def __array_function__(self, func, types, args, kwargs):
@@ -325,7 +323,7 @@ class Numpy:
           `arg` if `arg` is an instance of the base object class; otherwise, it
           will return the unmodified argument.
         """
-        if isinstance(arg, abstract.Quantity):
+        if isinstance(arg, _abstract.Quantity):
             return arg._data
         return arg
 
@@ -341,7 +339,7 @@ class Numpy:
         """
         return tuple(
             ti for ti in types
-            if not issubclass(ti, abstract.Object)
+            if not issubclass(ti, _abstract.Object)
         )
 
     @classmethod

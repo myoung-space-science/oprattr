@@ -3,17 +3,27 @@ import functools
 
 import numpy
 
-from . import abstract
+from ._abstract import (
+    Quantity,
+    Object,
+)
 from . import methods
 from . import mixins
-from . import typeface
-from ._operations import equality
+from . import _typeface
+from ._operations import (
+    unary,
+    equality,
+    ordering,
+    additive,
+    multiplicative,
+    MetadataTypeError,
+    MetadataValueError,
+)
 
 
-T = typeface.TypeVar('T')
+T = _typeface.TypeVar('T')
 
-
-class Operand(abstract.Object[T], mixins.Numpy):
+class Operand(Object[T], mixins.Numpy):
     """A concrete implementation of a real-valued object."""
 
     __abs__ = methods.__abs__
@@ -66,22 +76,22 @@ def array_equal(
     return numpy.array_equal(numpy.array(x), numpy.array(y), **kwargs)
 
 
+class OperationError(NotImplementedError):
+    """A metadata attribute does not support this operation.
+    
+    The default behavior when applying an operator to a metadata attribute of
+    `~Operand` is to copy the current value if the attribute does not define the
+    operation. Custom metadata attributes may raise this exception to indicate
+    that attempting to apply the operator is truly an error.
+    """
+
+
 @Operand.implementation(numpy.gradient)
 def gradient(x: Operand[T], *args, **kwargs):
     """Called for numpy.gradient(x)."""
-    data = numpy.gradient(x._data, *args, **kwargs)
-    meta = {}
-    for key, value in x._meta.items():
-        try:
-            v = numpy.gradient(value, **kwargs)
-        except TypeError as exc:
-            raise TypeError(
-                "Cannot compute numpy.gradient(x)"
-                f" because metadata attribute {key!r}"
-                " does not support this operation"
-            ) from exc
-        else:
-            meta[key] = v
+    f = numpy.gradient
+    data = f(x._data, *args, **kwargs)
+    meta = _apply_to_metadata(f, x, **kwargs)
     if isinstance(data, (list, tuple)):
         r = [type(x)(array, **meta) for array in data]
         if isinstance(data, tuple):
@@ -96,20 +106,32 @@ def wrapnumpy(f: collections.abc.Callable):
     def method(x: Operand[T], **kwargs):
         """Apply a numpy function to x."""
         data = f(x._data, **kwargs)
-        meta = {}
-        for key, value in x._meta.items():
-            try:
-                v = f(value, **kwargs)
-            except TypeError as exc:
-                raise TypeError(
-                    f"Cannot compute numpy.{f.__qualname__}(x)"
-                    f" because metadata attribute {key!r}"
-                    " does not support this operation"
-                ) from exc
-            else:
-                meta[key] = v
+        meta = _apply_to_metadata(f, x, **kwargs)
         return type(x)(data, **meta)
     return method
+
+
+def _apply_to_metadata(
+    f: collections.abc.Callable,
+    x: Operand,
+    **kwargs,
+) -> dict[str, _typeface.Any]:
+    """Apply `f` to metadata attributes."""
+    processed = {}
+    for key, value in x._meta.items():
+        try:
+            v = f(value, **kwargs)
+        except TypeError:
+            processed[key] = value
+        except OperationError as exc:
+            raise TypeError(
+                f"Cannot compute numpy.{f.__qualname__}(x)"
+                f" because metadata attribute {key!r} of {type(x)}"
+                " does not support this operation"
+            ) from exc
+        else:
+            processed[key] = v
+    return processed.copy()
 
 
 _OPERAND_UFUNCS = (
@@ -133,7 +155,25 @@ _OPERAND_FUNCTIONS = (
 )
 
 
-for f in _OPERAND_UFUNCS + _OPERAND_FUNCTIONS:
-    Operand.implement(f, wrapnumpy(f))
+for _func in _OPERAND_UFUNCS + _OPERAND_FUNCTIONS:
+    Operand.implement(_func, wrapnumpy(_func))
 
 
+__all__ = [
+    # Modules
+    methods,
+    mixins,
+    # Object classes
+    Quantity,
+    Object,
+    # Functions
+    unary,
+    equality,
+    ordering,
+    additive,
+    multiplicative,
+    # Error classes
+    MetadataTypeError,
+    MetadataValueError,
+    OperationError,
+]
