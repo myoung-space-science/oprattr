@@ -1,5 +1,10 @@
 ## NEXT
 
+- Add `oprattr.Object` and `oprattr.Quantity` to the public namespace
+- Rename modules that should not be part of the public namespace
+- Define the `OperationError` exception class
+- Change default behavior when a metadata attribute does not implement an operation
+
 ## v0.6.0
 
 - Add `methods` module
