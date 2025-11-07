@@ -1,8 +1,27 @@
+import collections.abc
+
 import numpy.typing
 
 from . import _abstract
+from . import methods
 from . import mixins
 from . import _typeface
+from ._abstract import (
+    Quantity,
+    Object,
+)
+from ._exceptions import (
+    MetadataTypeError,
+    MetadataValueError,
+    OperationError,
+)
+from ._operations import (
+    unary,
+    equality,
+    ordering,
+    additive,
+    multiplicative,
+)
 
 
 T = _typeface.TypeVar('T')
@@ -78,4 +97,32 @@ class Operand(_abstract.Object[T], mixins.Numpy):
 
     def __rpow__(self, other):
         """Called for other ** self."""
+
+    def __array__(self, *args, **kwargs) -> numpy.typing.NDArray:
+        """Called for numpy.array(self)."""
+
+
+def wrapnumpy(
+    f: collections.abc.Callable,
+) -> collections.abc.Callable[[Operand[T]], Operand[T]]: ...
+
+
+__all__ = [
+    # Modules
+    methods,
+    mixins,
+    # Object classes
+    Quantity,
+    Object,
+    # Functions
+    unary,
+    equality,
+    ordering,
+    additive,
+    multiplicative,
+    # Error classes
+    MetadataTypeError,
+    MetadataValueError,
+    OperationError,
+]
 
