@@ -1,5 +1,7 @@
 ## NEXT
 
+- Update types in `__init__.pyi`
+
 ## v0.7.0
 
 - Add `oprattr.Object` and `oprattr.Quantity` to the public namespace
