@@ -7,6 +7,11 @@ from ._abstract import (
     Quantity,
     Object,
 )
+from ._exceptions import (
+    MetadataTypeError,
+    MetadataValueError,
+    OperationError,
+)
 from . import methods
 from . import mixins
 from . import _typeface
@@ -16,8 +21,6 @@ from ._operations import (
     ordering,
     additive,
     multiplicative,
-    MetadataTypeError,
-    MetadataValueError,
 )
 
 
@@ -74,16 +77,6 @@ def array_equal(
 ) -> bool:
     """Called for numpy.array_equal(x, y)"""
     return numpy.array_equal(numpy.array(x), numpy.array(y), **kwargs)
-
-
-class OperationError(NotImplementedError):
-    """A metadata attribute does not support this operation.
-    
-    The default behavior when applying an operator to a metadata attribute of
-    `~Operand` is to copy the current value if the attribute does not define the
-    operation. Custom metadata attributes may raise this exception to indicate
-    that attempting to apply the operator is truly an error.
-    """
 
 
 @Operand.implementation(numpy.gradient)
@@ -166,14 +159,16 @@ __all__ = [
     # Object classes
     Quantity,
     Object,
-    # Functions
-    unary,
-    equality,
-    ordering,
-    additive,
-    multiplicative,
     # Error classes
     MetadataTypeError,
     MetadataValueError,
     OperationError,
+    # Functions
+    additive,
+    equality,
+    multiplicative,
+    ordering,
+    unary,
+    wrapnumpy,
 ]
+
