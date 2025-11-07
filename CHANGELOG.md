@@ -1,5 +1,7 @@
 ## NEXT
 
+## v0.7.0
+
 - Add `oprattr.Object` and `oprattr.Quantity` to the public namespace
 - Rename modules that should not be part of the public namespace
 - Define the `OperationError` exception class
