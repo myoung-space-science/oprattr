@@ -9,7 +9,6 @@ from . import _typeface
 
 T = _typeface.TypeVar('T')
 
-
 class Real:
     """Mixin for adding basic real-valued operator support."""
 
@@ -84,7 +83,6 @@ class Real:
 
 
 UserFunction = collections.abc.Callable[..., T]
-
 
 class Numpy:
     """Mixin for adding support for `numpy` functions to numeric objects.
