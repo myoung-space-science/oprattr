@@ -4,10 +4,10 @@ import numbers
 import numpy
 
 from . import _abstract
-from . import typeface
+from . import _typeface
 
 
-T = typeface.TypeVar('T')
+T = _typeface.TypeVar('T')
 
 
 class Real:

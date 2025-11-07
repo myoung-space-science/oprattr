@@ -9,7 +9,7 @@ from ._abstract import (
 )
 from . import methods
 from . import mixins
-from . import typeface
+from . import _typeface
 from ._operations import (
     unary,
     equality,
@@ -21,7 +21,7 @@ from ._operations import (
 )
 
 
-T = typeface.TypeVar('T')
+T = _typeface.TypeVar('T')
 
 
 class Operand(Object[T], mixins.Numpy):
