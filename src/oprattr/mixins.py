@@ -3,7 +3,7 @@ import numbers
 
 import numpy
 
-from . import abstract
+from . import _abstract
 from . import typeface
 
 
@@ -128,7 +128,7 @@ class Numpy:
         numpy.ndarray,
         numbers.Number,
         list,
-        abstract.Quantity,
+        _abstract.Quantity,
     }
 
     def __array_ufunc__(self, ufunc, method, *args, **kwargs):
@@ -163,7 +163,7 @@ class Numpy:
             return NotImplemented
         if out:
             kwargs['out'] = tuple(
-                x._data if isinstance(x, abstract.Quantity)
+                x._data if isinstance(x, _abstract.Quantity)
                 else x for x in out
             )
         if self._implements(ufunc):
@@ -208,7 +208,7 @@ class Numpy:
 
     _FUNCTION_TYPES = {
         numpy.ndarray,
-        abstract.Object,
+        _abstract.Object,
      } | set(numpy.ScalarType)
 
     def __array_function__(self, func, types, args, kwargs):
@@ -325,7 +325,7 @@ class Numpy:
           `arg` if `arg` is an instance of the base object class; otherwise, it
           will return the unmodified argument.
         """
-        if isinstance(arg, abstract.Quantity):
+        if isinstance(arg, _abstract.Quantity):
             return arg._data
         return arg
 
@@ -341,7 +341,7 @@ class Numpy:
         """
         return tuple(
             ti for ti in types
-            if not issubclass(ti, abstract.Object)
+            if not issubclass(ti, _abstract.Object)
         )
 
     @classmethod

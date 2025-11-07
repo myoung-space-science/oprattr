@@ -1,13 +1,13 @@
 import numpy.typing
 
-from . import abstract
+from . import _abstract
 from . import mixins
 from . import typeface
 
 
 T = typeface.TypeVar('T')
 
-class Operand(abstract.Object[T], mixins.Numpy):
+class Operand(_abstract.Object[T], mixins.Numpy):
     """A concrete implementation of a real-valued object."""
 
     def __abs__(self) -> typeface.Self:

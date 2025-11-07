@@ -3,7 +3,7 @@ import functools
 
 import numpy
 
-from . import abstract
+from . import _abstract
 from . import methods
 from . import mixins
 from . import typeface
@@ -13,7 +13,7 @@ from ._operations import equality
 T = typeface.TypeVar('T')
 
 
-class Operand(abstract.Object[T], mixins.Numpy):
+class Operand(_abstract.Object[T], mixins.Numpy):
     """A concrete implementation of a real-valued object."""
 
     __abs__ = methods.__abs__
