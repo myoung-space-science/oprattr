@@ -1,13 +1,14 @@
 import itertools
 import numbers
 
+import numerical
 import numpy
 import pytest
 
 import oprattr
 
 
-class Symbol(oprattr.mixins.Numpy):
+class Symbol(numerical.mixins.NumpyMixin):
     """A symbolic test attribute."""
 
     def __init__(self, __x: str):
