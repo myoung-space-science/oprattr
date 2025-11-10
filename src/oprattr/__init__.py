@@ -26,7 +26,7 @@ from ._operations import (
 
 T = _typeface.TypeVar('T')
 
-class Operand(Object[T], mixins.Numpy):
+class Operand(Object[T], mixins.NumpyMixin):
     """A concrete implementation of a real-valued object."""
 
     __abs__ = methods.__abs__
@@ -66,7 +66,26 @@ class Operand(Object[T], mixins.Numpy):
             # pure `numpy` result.
             f = getattr(ufunc, method)
             return equality(f, *args)
-        return super()._apply_ufunc(ufunc, method, *args, **kwargs)
+        data, meta = super()._apply_ufunc(ufunc, method, *args, **kwargs)
+        return self._create_new(data, **meta)
+
+    def _apply_function(self, func, types, args, kwargs):
+        data, meta = super()._apply_function(func, types, args, kwargs)
+        if data is NotImplemented:
+            return data
+        return self._create_new(data, **meta)
+
+    def _get_numpy_array(self):
+        return numpy.array(self._data)
+
+    def _create_new(self, data, **meta):
+        """Create a new instance from data and metadata.
+
+        The default implementation uses the standard `__new__` constructor.
+        Subclasses may overload this method to use a different constructor
+        (e.g., a module-defined factory function).
+        """
+        return type(self)(data, **meta)
 
 
 @Operand.implementation(numpy.array_equal)
@@ -125,31 +144,6 @@ def _apply_to_metadata(
         else:
             processed[key] = v
     return processed.copy()
-
-
-_OPERAND_UFUNCS = (
-    numpy.sqrt,
-    numpy.sin,
-    numpy.cos,
-    numpy.tan,
-    numpy.log,
-    numpy.log2,
-    numpy.log10,
-)
-
-
-_OPERAND_FUNCTIONS = (
-    numpy.squeeze,
-    numpy.mean,
-    numpy.sum,
-    numpy.cumsum,
-    numpy.transpose,
-    numpy.trapezoid,
-)
-
-
-for _func in _OPERAND_UFUNCS + _OPERAND_FUNCTIONS:
-    Operand.implement(_func, wrapnumpy(_func))
 
 
 __all__ = [
