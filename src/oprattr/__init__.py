@@ -26,7 +26,7 @@ from ._operations import (
 
 T = _typeface.TypeVar('T')
 
-class Operand(Object[T], mixins.Numpy):
+class Operand(Object[T], mixins.NumpyMixin):
     """A concrete implementation of a real-valued object."""
 
     __abs__ = methods.__abs__
@@ -66,7 +66,35 @@ class Operand(Object[T], mixins.Numpy):
             # pure `numpy` result.
             f = getattr(ufunc, method)
             return equality(f, *args)
-        return super()._apply_ufunc(ufunc, method, *args, **kwargs)
+        data, meta = super()._apply_ufunc(ufunc, method, *args, **kwargs)
+        return self._from_numpy(data, **meta)
+
+    def _apply_function(self, func, types, args, kwargs):
+        data, meta = super()._apply_function(func, types, args, kwargs)
+        if data is NotImplemented:
+            return data
+        return self._from_numpy(data, **meta)
+
+    def _get_numpy_array(self):
+        return numpy.array(self._data)
+
+    def _from_numpy(self, data, **meta):
+        """Create a new instance after applying a numpy function."""
+        if isinstance(data, (list, tuple)):
+            r = [self._factory(array, **meta) for array in data]
+            if isinstance(data, tuple):
+                return tuple(r)
+            return r
+        return self._factory(data, **meta)
+
+    def _factory(self, data, **meta):
+        """Create a new instance from data and metadata.
+
+        The default implementation uses the standard `__new__` constructor.
+        Subclasses may overload this method to use a different constructor
+        (e.g., a module-defined factory function).
+        """
+        return type(self)(data, **meta)
 
 
 @Operand.implementation(numpy.array_equal)
@@ -77,79 +105,6 @@ def array_equal(
 ) -> bool:
     """Called for numpy.array_equal(x, y)"""
     return numpy.array_equal(numpy.array(x), numpy.array(y), **kwargs)
-
-
-@Operand.implementation(numpy.gradient)
-def gradient(x: Operand[T], *args, **kwargs):
-    """Called for numpy.gradient(x)."""
-    f = numpy.gradient
-    data = f(x._data, *args, **kwargs)
-    meta = _apply_to_metadata(f, x, **kwargs)
-    if isinstance(data, (list, tuple)):
-        r = [type(x)(array, **meta) for array in data]
-        if isinstance(data, tuple):
-            return tuple(r)
-        return r
-    return type(x)(data, **meta)
-
-
-def wrapnumpy(f: collections.abc.Callable):
-    """Implement a numpy function for objects with metadata."""
-    @functools.wraps(f)
-    def method(x: Operand[T], **kwargs):
-        """Apply a numpy function to x."""
-        data = f(x._data, **kwargs)
-        meta = _apply_to_metadata(f, x, **kwargs)
-        return type(x)(data, **meta)
-    return method
-
-
-def _apply_to_metadata(
-    f: collections.abc.Callable,
-    x: Operand,
-    **kwargs,
-) -> dict[str, _typeface.Any]:
-    """Apply `f` to metadata attributes."""
-    processed = {}
-    for key, value in x._meta.items():
-        try:
-            v = f(value, **kwargs)
-        except TypeError:
-            processed[key] = value
-        except OperationError as exc:
-            raise TypeError(
-                f"Cannot compute numpy.{f.__qualname__}(x)"
-                f" because metadata attribute {key!r} of {type(x)}"
-                " does not support this operation"
-            ) from exc
-        else:
-            processed[key] = v
-    return processed.copy()
-
-
-_OPERAND_UFUNCS = (
-    numpy.sqrt,
-    numpy.sin,
-    numpy.cos,
-    numpy.tan,
-    numpy.log,
-    numpy.log2,
-    numpy.log10,
-)
-
-
-_OPERAND_FUNCTIONS = (
-    numpy.squeeze,
-    numpy.mean,
-    numpy.sum,
-    numpy.cumsum,
-    numpy.transpose,
-    numpy.trapezoid,
-)
-
-
-for _func in _OPERAND_UFUNCS + _OPERAND_FUNCTIONS:
-    Operand.implement(_func, wrapnumpy(_func))
 
 
 __all__ = [
@@ -169,6 +124,5 @@ __all__ = [
     multiplicative,
     ordering,
     unary,
-    wrapnumpy,
 ]
 

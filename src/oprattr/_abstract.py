@@ -25,7 +25,7 @@ class Quantity(numerical.Quantity[DataType], _typeface.Protocol):
     _meta: collections.abc.Mapping[str, _typeface.Any]
 
 
-class Object(numerical.Real, _typeface.Generic[DataType]):
+class Object(numerical.Object[DataType], numerical.Real):
     """A real-valued object with metadata attributes."""
 
     def __init__(
@@ -35,7 +35,7 @@ class Object(numerical.Real, _typeface.Generic[DataType]):
     ) -> None:
         if not isinstance(__data, numerical.Real):
             raise TypeError("Data input to Object must be real-valued")
-        self._data = __data
+        super().__init__(__data)
         self._meta = metadata
 
     def __str__(self):

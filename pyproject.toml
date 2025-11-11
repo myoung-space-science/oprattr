@@ -24,4 +24,4 @@ dev = [
 ]
 
 [tool.uv.sources]
-numerical = { git = "https://github.com/myoung-space-science/numerical", rev = "v0.2.0" }
+numerical = { git = "https://github.com/myoung-space-science/numerical", rev = "v0.3.0" }

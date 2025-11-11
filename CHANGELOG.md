@@ -1,5 +1,8 @@
 ## NEXT
 
+- Redefine `mixins.NumpyMixin` to extend `numerical.NumpyMixin`
+- Redefine `Object` to extend `numerical.Object`
+- Improve flexibility of `numpy` functions in `Operand`
 - Update types in `__init__.pyi`
 
 ## v0.7.0

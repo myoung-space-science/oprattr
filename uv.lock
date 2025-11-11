@@ -108,8 +108,8 @@ wheels = [
 
 [[package]]
 name = "numerical"
-version = "0.2.0"
-source = { git = "https://github.com/myoung-space-science/numerical?rev=v0.2.0#a6e3af04c8815fc82cd06b66696392daf50b4f2c" }
+version = "0.3.0"
+source = { git = "https://github.com/myoung-space-science/numerical?rev=v0.3.0#b4a46e5e93e8d256c1198aec22d5556ea041673b" }
 dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.3.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -267,7 +267,7 @@ wheels = [
 
 [[package]]
 name = "oprattr"
-version = "0.2.0"
+version = "0.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "numerical" },
@@ -284,7 +284,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "numerical", git = "https://github.com/myoung-space-science/numerical?rev=v0.2.0" },
+    { name = "numerical", git = "https://github.com/myoung-space-science/numerical?rev=v0.3.0" },
     { name = "numpy", specifier = ">=2.2.1" },
     { name = "scipy", specifier = ">=1.15.0" },
 ]
