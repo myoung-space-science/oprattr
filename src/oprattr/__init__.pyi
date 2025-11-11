@@ -102,11 +102,6 @@ class Operand(_abstract.Object[T], mixins.Numpy):
         """Called for numpy.array(self)."""
 
 
-def wrapnumpy(
-    f: collections.abc.Callable,
-) -> collections.abc.Callable[[Operand[T]], Operand[T]]: ...
-
-
 __all__ = [
     # Modules
     methods,
