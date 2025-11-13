@@ -71,13 +71,13 @@ def equality(f: operators.Operator, a, b):
     x = a._data if isinstance(a, Quantity) else a
     y = b._data if isinstance(b, Quantity) else b
     fxy = f(x, y)
+    isne = f(1, 2)
     try:
         iter(fxy)
     except TypeError:
         r = bool(fxy)
     else:
-        r = all(fxy)
-    isne = f(1, 2)
+        r = all(fxy) or isne
     if isinstance(a, Quantity) and isinstance(b, Quantity):
         if a._meta != b._meta:
             return isne
