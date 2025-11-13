@@ -2,6 +2,9 @@ from ._abstract import (
     Quantity,
     Object,
 )
+from ._attribute import (
+    Attribute,
+)
 from ._exceptions import (
     MetadataTypeError,
     MetadataValueError,
@@ -26,6 +29,7 @@ __all__ = [
     methods,
     mixins,
     # Object classes
+    Attribute,
     Quantity,
     Object,
     Operand,
