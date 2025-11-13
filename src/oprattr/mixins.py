@@ -131,17 +131,16 @@ class NumpyMixin(numerical.mixins.NumpyMixin):
                 if isinstance(x, Quantity) else x
                 for x in args
             ]
+            errmsg = f"Attribute {key!r} does not support this operation"
             try:
                 result = f(*values, **kwargs)
             except TypeError as err:
                 if len(values) > 1 and any(v != values[0] for v in values):
-                    raise err # TODO: More descriptive error message
+                    raise TypeError(errmsg) from err
                 else:
                     meta[key] = values[0]
             except OperationError as err:
-                raise TypeError(
-                    f"Attribute {key!r} does not support this operation"
-                ) from err
+                raise OperationError(errmsg) from err
             else:
                 meta[key] = result
         return meta.copy()
