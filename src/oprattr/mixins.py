@@ -96,13 +96,12 @@ class NumpyMixin(numerical.mixins.NumpyMixin):
     def _apply_ufunc(self, ufunc, method, *args, **kwargs):
         data = super()._apply_ufunc(ufunc, method, *args, **kwargs)
         f = getattr(ufunc, method)
-        types = [type(arg) for arg in args]
         try:
             meta = self._apply_operator_to_metadata(f, *args, **kwargs)
         except OperationError as err:
-            raise TypeError(
-                f"Cannot apply numpy.{ufunc} to arguments with type(s) {types}"
-            ) from err
+            types = [type(arg) for arg in args]
+            errmsg = _build_errmsg(ufunc, types, args)
+            raise TypeError(errmsg) from err
         if method != 'at':
             return data, meta
 
@@ -111,19 +110,13 @@ class NumpyMixin(numerical.mixins.NumpyMixin):
         try:
             meta = self._apply_operator_to_metadata(func, *args, **kwargs)
         except OperationError as err:
-            raise TypeError(
-                f"Cannot apply numpy.{func} to arguments with type(s) {types}"
-            ) from err
+            errmsg = _build_errmsg(func, types, args)
+            raise TypeError(errmsg) from err
         return data, meta
 
     def _apply_operator_to_metadata(self, f, *args, **kwargs):
         """Apply a numpy universal or public function to arguments."""
-        keys = {
-            k
-            for x in args
-            if isinstance(x, Quantity)
-            for k in x._meta.keys()
-        }
+        keys = _get_metadata_keys(args)
         meta = {}
         for key in keys:
             values = [
@@ -144,4 +137,35 @@ class NumpyMixin(numerical.mixins.NumpyMixin):
             else:
                 meta[key] = result
         return meta.copy()
+
+
+def _build_errmsg(func, types, args):
+    """Build an error message from a function and metadata attributes."""
+    funcstr = f"numpy.{func.__qualname__}"
+    keys = _get_metadata_keys(args)
+    metastr = _build_metastr(keys)
+    s = f"Cannot apply {funcstr} to operand type(s) {types}"
+    if metastr:
+        return f"{s} with metadata parameter(s) {metastr}"
+    return s
+
+
+def _get_metadata_keys(args):
+    """Extract metadata attribute keys."""
+    return {
+        k
+        for x in args
+        if isinstance(x, Quantity)
+        for k in x._meta.keys()
+    }
+
+
+def _build_metastr(keys: _typeface.Sequence[str]):
+    """Build a string from metadata attributes."""
+    if not keys:
+        return ""
+    metastr = ", ".join(repr(key) for key in keys)
+    if len(keys) == 1:
+        return metastr
+    return f"({metastr})"
 
