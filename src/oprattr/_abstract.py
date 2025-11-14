@@ -51,6 +51,8 @@ class Object(numerical.Object[DataType], numerical.Real):
             )
         except Exception:
             datastr = str(self._data)
+        if not self._meta:
+            return datastr
         metastr = ", ".join(f"{k}={str(v)!r}" for k, v in self._meta.items())
         return f"{datastr}, {metastr}"
 

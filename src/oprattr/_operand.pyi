@@ -1,32 +1,13 @@
-import collections.abc
-
-import numpy.typing
+import numpy
 
 from . import _abstract
-from . import methods
 from . import mixins
 from . import _typeface
-from ._abstract import (
-    Quantity,
-    Object,
-)
-from ._exceptions import (
-    MetadataTypeError,
-    MetadataValueError,
-    OperationError,
-)
-from ._operations import (
-    unary,
-    equality,
-    ordering,
-    additive,
-    multiplicative,
-)
 
 
 T = _typeface.TypeVar('T')
 
-class Operand(_abstract.Object[T], mixins.Numpy):
+class Operand(_abstract.Object[T], mixins.NumpyMixin):
     """A concrete implementation of a real-valued object."""
 
     def __abs__(self) -> _typeface.Self:
@@ -56,43 +37,43 @@ class Operand(_abstract.Object[T], mixins.Numpy):
     def __ge__(self, other) -> bool | numpy.typing.NDArray[numpy.bool]:
         """Called for self >= other."""
 
-    def __add__(self, other) -> _typeface.Self:
+    def __add__(self, other) -> _typeface.Self[T]:
         """Called for self + other."""
 
-    def __radd__(self, other) -> _typeface.Self:
+    def __radd__(self, other) -> _typeface.Self[T]:
         """Called for other + self."""
 
-    def __sub__(self, other) -> _typeface.Self:
+    def __sub__(self, other) -> _typeface.Self[T]:
         """Called for self - other."""
 
-    def __rsub__(self, other) -> _typeface.Self:
+    def __rsub__(self, other) -> _typeface.Self[T]:
         """Called for other - self."""
 
-    def __mul__(self, other) -> _typeface.Self:
+    def __mul__(self, other) -> _typeface.Self[T]:
         """Called for self * other."""
 
-    def __rmul__(self, other) -> _typeface.Self:
+    def __rmul__(self, other) -> _typeface.Self[T]:
         """Called for other * self."""
 
-    def __truediv__(self, other) -> _typeface.Self:
+    def __truediv__(self, other) -> _typeface.Self[T]:
         """Called for self / other."""
 
-    def __rtruediv__(self, other) -> _typeface.Self:
+    def __rtruediv__(self, other) -> _typeface.Self[T]:
         """Called for other / self."""
 
-    def __floordiv__(self, other) -> _typeface.Self:
+    def __floordiv__(self, other) -> _typeface.Self[T]:
         """Called for self // other."""
 
-    def __rfloordiv__(self, other) -> _typeface.Self:
+    def __rfloordiv__(self, other) -> _typeface.Self[T]:
         """Called for other // self."""
 
-    def __mod__(self, other) -> _typeface.Self:
+    def __mod__(self, other) -> _typeface.Self[T]:
         """Called for self % other."""
 
-    def __rmod__(self, other) -> _typeface.Self:
+    def __rmod__(self, other) -> _typeface.Self[T]:
         """Called for other % self."""
 
-    def __pow__(self, other) -> _typeface.Self:
+    def __pow__(self, other) -> _typeface.Self[T]:
         """Called for self ** other."""
 
     def __rpow__(self, other):
@@ -101,23 +82,16 @@ class Operand(_abstract.Object[T], mixins.Numpy):
     def __array__(self, *args, **kwargs) -> numpy.typing.NDArray:
         """Called for numpy.array(self)."""
 
+    def _from_numpy(self, data, **meta) -> _typeface.Self[T]:
+        """Create a new instance after applying a numpy function."""
 
-__all__ = [
-    # Modules
-    methods,
-    mixins,
-    # Object classes
-    Quantity,
-    Object,
-    # Functions
-    unary,
-    equality,
-    ordering,
-    additive,
-    multiplicative,
-    # Error classes
-    MetadataTypeError,
-    MetadataValueError,
-    OperationError,
-]
+    def _factory(self, data, **meta) -> _typeface.Self[T]:
+        """Create a new instance from data and metadata.
+
+        The default implementation uses the standard `__new__` constructor.
+        Subclasses may overload this method to use a different constructor
+        (e.g., a module-defined factory function).
+        """
+
+
 

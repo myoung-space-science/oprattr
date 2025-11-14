@@ -1,5 +1,8 @@
 ## NEXT
 
+- Update error types raised and messages printed when `mixins.NumpyMixin` processes metadata
+- Define the `Attribute` class
+
 ## v0.8.0
 
 - Redefine `mixins.NumpyMixin` to extend `numerical.NumpyMixin`
