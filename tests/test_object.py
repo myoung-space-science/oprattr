@@ -93,11 +93,6 @@ class Symbol(numerical.mixins.NumpyMixin):
         return NotImplemented
 
 
-@Symbol.implementation(numpy.sqrt)
-def symbol_sqrt(x: Symbol):
-    return f"numpy.sqrt({x})"
-
-
 @Symbol.implementation(numpy.sin)
 def symbol_sin(x: Symbol):
     return f"numpy.sin({x})"
@@ -148,14 +143,23 @@ def symbol_cumsum(x: Symbol, **kwargs):
     return f"numpy.cumsum({x})"
 
 
-@Symbol.implementation(numpy.transpose)
-def symbol_transpose(x: Symbol, **kwargs):
-    return f"numpy.transpose({x})"
-
-
 @Symbol.implementation(numpy.gradient)
 def symbol_gradient(x: Symbol, **kwargs):
     return f"numpy.gradient({x})"
+
+
+@Symbol.implementation(numpy.transpose)
+def symbol_transpose(x: Symbol, **kwargs):
+    raise oprattr.OperationError(
+        f"Cannot transpose a Symbol"
+    ) from None
+
+
+@Symbol.implementation(numpy.sqrt)
+def symbol_sqrt(x: Symbol):
+    raise oprattr.OperationError(
+        f"Symbols don't do square roots"
+    ) from None
 
 
 def symbolic_binary(a, op, b):
@@ -382,14 +386,6 @@ def test_trig():
     assert that == x(numpy.tan(v), name=Symbol('numpy.tan(A)'))
 
 
-def test_sqrt():
-    """Test `numpy.sqrt`."""
-    this = x(4, name=Symbol('A'))
-    that = numpy.sqrt(this)
-    assert isinstance(that, oprattr.Operand)
-    assert that == x(2, name=Symbol('numpy.sqrt(A)'))
-
-
 def test_logs():
     """Test `numpy` logarithmic ufuncs."""
     nA = Symbol('A')
@@ -474,22 +470,6 @@ def test_cumsum():
     assert numpy.array_equal(that, x(numpy.cumsum(v, axis=-1), name=nR))
 
 
-def test_transpose():
-    """Test `numpy.transpose`."""
-    nA = Symbol('A')
-    nR = Symbol('numpy.transpose(A)')
-    v = numpy.arange(3*4*5).reshape(3, 4, 5)
-    this = x(v, name=nA)
-    that = numpy.transpose(this)
-    assert isinstance(that, oprattr.Operand)
-    assert numpy.array_equal(that, x(numpy.transpose(v), name=nR))
-    for axes in itertools.permutations(range(v.ndim)):
-        that = numpy.transpose(this, axes=axes)
-        assert isinstance(that, oprattr.Operand)
-        expected = x(numpy.transpose(v, axes=axes), name=nR)
-        assert numpy.array_equal(that, expected)
-
-
 def test_gradient():
     """Test `numpy.gradient`."""
     nA = Symbol('A')
@@ -508,6 +488,32 @@ def test_gradient():
         grad = numpy.gradient(v, axis=axis)
         assert numpy.array_equal(that, grad)
         assert t._meta['name'] == nR
+
+
+def test_sqrt():
+    """Test `numpy.sqrt`, which raises and exception in `Symbol`."""
+    this = x(4)
+    that = numpy.sqrt(this)
+    assert isinstance(that, oprattr.Operand)
+    assert that == x(2)
+    with pytest.raises(TypeError):
+        numpy.sqrt(x(3, name=Symbol('A')))
+
+
+def test_transpose():
+    """Test `numpy.transpose`, which raises an exception in `Symbol`."""
+    v = numpy.arange(3*4*5).reshape(3, 4, 5)
+    this = x(v)
+    that = numpy.transpose(this)
+    assert isinstance(that, oprattr.Operand)
+    assert numpy.array_equal(that, x(numpy.transpose(v)))
+    for axes in itertools.permutations(range(v.ndim)):
+        that = numpy.transpose(this, axes=axes)
+        assert isinstance(that, oprattr.Operand)
+        expected = x(numpy.transpose(v, axes=axes))
+        assert numpy.array_equal(that, expected)
+    with pytest.raises(TypeError):
+        numpy.transpose(x(v, name=Symbol('A')))
 
 
 def test_trapezoid():
