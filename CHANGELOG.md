@@ -1,5 +1,7 @@
 ## NEXT
 
+- Rename `abstract.py` to `_base.py` &mdash; it is not meant to be part of the public API
+
 ## v0.9.0
 
 - Update error types raised and messages printed when `mixins.NumpyMixin` processes metadata
