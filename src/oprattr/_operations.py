@@ -1,6 +1,6 @@
 from numerical import operators
 
-from ._abstract import (
+from ._base import (
     Quantity,
     Object,
 )

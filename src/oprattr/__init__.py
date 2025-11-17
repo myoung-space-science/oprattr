@@ -1,9 +1,9 @@
-from ._abstract import (
-    Quantity,
-    Object,
-)
 from ._attribute import (
     Attribute,
+)
+from ._base import (
+    Quantity,
+    Object,
 )
 from ._exceptions import (
     MetadataTypeError,

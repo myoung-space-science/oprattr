@@ -1,6 +1,6 @@
 import numpy
 
-from . import _abstract
+from . import _base
 from . import methods
 from . import mixins
 from ._operations import equality
@@ -9,7 +9,7 @@ from . import _typeface
 
 T = _typeface.TypeVar('T')
 
-class Operand(_abstract.Object[T], mixins.NumpyMixin):
+class Operand(_base.Object[T], mixins.NumpyMixin):
     """A concrete implementation of a real-valued object."""
 
     __abs__ = methods.__abs__

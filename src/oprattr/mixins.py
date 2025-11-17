@@ -2,7 +2,7 @@ import collections.abc
 
 import numerical
 
-from ._abstract import Quantity
+from ._base import Quantity
 from ._exceptions import OperationError
 from . import _typeface
 
